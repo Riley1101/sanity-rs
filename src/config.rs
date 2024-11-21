@@ -1,27 +1,27 @@
 use std::fmt::Display;
 
 enum ClientPerspective {
-    Default,
+    Raw,
     Draft,
     Live,
 }
 
 pub struct SanityConfig {
-    project_id: String,
-    dataset: String,
-    use_cdn: bool,
-    token: Option<String>,
-    perspective: ClientPerspective,
-    api_host: Option<String>,
-    api_version: Option<String>,
-    proxy: Option<String>,
-    request_tag_prefix: Option<String>,
-    ignore_browser_token_warning: bool,
-    with_credentials: bool,
-    timeout: Option<u64>,
-    max_retries: Option<u64>,
-    retry_delay: Option<fn(u64) -> u64>,
-    use_project_hostname: bool,
+    pub project_id: String,
+    pub dataset: String,
+    pub use_cdn: bool,
+    pub token: Option<String>,
+    pub perspective: ClientPerspective,
+    pub api_host: Option<String>,
+    pub api_version: Option<String>,
+    pub proxy: Option<String>,
+    pub request_tag_prefix: Option<String>,
+    pub ignore_browser_token_warning: bool,
+    pub with_credentials: bool,
+    pub timeout: Option<u64>,
+    pub max_retries: Option<u64>,
+    pub retry_delay: Option<fn(u64) -> u64>,
+    pub use_project_hostname: bool,
 }
 
 impl SanityConfig {
@@ -31,7 +31,7 @@ impl SanityConfig {
             dataset,
             use_cdn: false,
             token: None,
-            perspective: ClientPerspective::Default,
+            perspective: ClientPerspective::Raw,
             api_host: None,
             api_version: None,
             proxy: None,
