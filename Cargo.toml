@@ -12,5 +12,5 @@ hyper-util = { version = "0.1", features = ["full"] }
 http-body-util = "0.1"
 bytes = "1"
 serde_json = "1.0"
-serde = "1.0.215"
+serde = { version = "1.0.215", features = ["derive"] }
 

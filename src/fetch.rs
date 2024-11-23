@@ -2,10 +2,13 @@ use bytes::Bytes;
 use http_body_util::{BodyExt, Empty};
 use hyper::{body::Buf, Request, Uri};
 use hyper_util::rt::TokioIo;
+use serde::de;
 use serde_json::from_reader;
 use tokio::net::TcpStream;
 
-pub async fn fetch_json(uri: Uri) -> Result<serde_json::Value, Box<dyn std::error::Error>> {
+pub async fn fetch_json<T: de::DeserializeOwned>(
+    uri: Uri,
+) -> Result<T, Box<dyn std::error::Error>> {
     let host = uri.host().expect("Expected host to be a string");
     let port = uri.port_u16().unwrap_or(80);
     let addr = format!("{}:{}", host, port);
@@ -33,11 +36,25 @@ pub async fn fetch_json(uri: Uri) -> Result<serde_json::Value, Box<dyn std::erro
     Ok(response)
 }
 
-#[tokio::test]
-async fn fetch_test() {
-    let uri = "https://jsonplaceholder.typicode.com/todos/1"
-        .parse()
-        .unwrap();
-    let response = fetch_json(uri).await;
-    println!("Response: {:?}", response);
+#[cfg(test)]
+mod tests {
+    use serde::{Deserialize, Serialize};
+    use super::*;
+
+    #[derive(Debug, Serialize, Deserialize, PartialEq)]
+    struct Todo {
+        userId: u32,
+        id: u32,
+        title: String,
+        completed: bool,
+    }
+
+    #[tokio::test]
+    async fn fetch_test() {
+        let uri = "http://jsonplaceholder.typicode.com/todos/1"
+            .parse()
+            .unwrap();
+        let response: Result<Todo, Box<dyn std::error::Error>> = fetch_json(uri).await;
+        println!("{:?}", response);
+    }
 }
