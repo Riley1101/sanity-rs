@@ -1,8 +1,6 @@
 use crate::config::SanityConfig;
 use reqwest::Client as ReqwestClient;
-use std::fmt::Debug;
 use std::fmt::Display;
-use std::future::Future;
 
 #[derive(Default)]
 pub struct RequestPayload {
@@ -68,15 +66,12 @@ impl SanityClient {
         format!("{}{}", query, body)
     }
 
-    pub async fn send(&mut self) -> &str {
-        println!("{}", self.get_query());
+    pub async fn send(&mut self) -> String {
+        println!("Query: {}", self.get_query());
         let req = self.get_query();
-        let result = self.client.get(&req).send();
-        let response = result.await.unwrap();
-        let data = response.text().await.unwrap();
-        println!("{}", data);
-        // print debug
-        "Hello"
+        let client = reqwest::Client::new();
+        let res = client.get(req).send().await.unwrap();
+        res.text().await.unwrap()
     }
 }
 
