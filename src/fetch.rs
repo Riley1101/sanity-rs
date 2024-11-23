@@ -55,6 +55,11 @@ mod tests {
             .parse()
             .unwrap();
         let response: Result<Todo, Box<dyn std::error::Error>> = fetch_json(uri).await;
+        let response = match response {
+            Ok(response) => Some(response),
+            Err(_) => None,
+        };
         println!("{:?}", response);
+        assert_ne!(response, None);
     }
 }
