@@ -1,4 +1,5 @@
 use crate::config::SanityConfig;
+use crate::fetch::fetch_json;
 use reqwest::Client as ReqwestClient;
 use std::fmt::Display;
 
@@ -30,6 +31,26 @@ impl SanityClient {
             payload: RequestPayload::default(),
         }
     }
+    
+    /// Set the body of the request
+    pub fn body(&mut self, body: &str) -> &mut Self {
+        self.payload.set_body(body);
+        self
+    }
+
+    pub async fn send(&mut self) -> String {
+        println!("Query: {}", self.get_query());
+        let req = self.get_query();
+        let client = reqwest::Client::new();
+        let res = client.get(req).send().await.unwrap();
+        res.text().await.unwrap()
+    }
+
+    fn get_query(&self) -> String {
+        let query = self.payload.query.as_deref().unwrap_or("");
+        let body = self.payload.body.as_deref().unwrap_or("");
+        format!("{}{}", query, body)
+    }
 
     /// Generate the base URL for the Sanity API
     fn generate_base_url(&self) -> String {
@@ -52,26 +73,6 @@ impl SanityClient {
             }
         }
         self
-    }
-
-    /// Set the body of the request
-    pub fn body(&mut self, body: &str) -> &mut Self {
-        self.payload.set_body(body);
-        self
-    }
-
-    fn get_query(&self) -> String {
-        let query = self.payload.query.as_deref().unwrap_or("");
-        let body = self.payload.body.as_deref().unwrap_or("");
-        format!("{}{}", query, body)
-    }
-
-    pub async fn send(&mut self) -> String {
-        println!("Query: {}", self.get_query());
-        let req = self.get_query();
-        let client = reqwest::Client::new();
-        let res = client.get(req).send().await.unwrap();
-        res.text().await.unwrap()
     }
 }
 

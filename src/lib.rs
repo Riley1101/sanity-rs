@@ -2,6 +2,7 @@ mod client;
 mod config;
 mod error;
 mod query;
+mod fetch;
 
 use dotenv::dotenv;
 use client::SanityClient;
@@ -21,16 +22,16 @@ mod tests {
     use super::*;
 
     #[tokio::test]
-    async fn paused_time() {
+    async fn tokio_async_test() {
         let start = std::time::Instant::now();
         tokio::time::sleep(Duration::from_millis(500)).await;
         println!("{:?}ms", start.elapsed().as_millis());
     }
 
     #[tokio::test]
-    async fn it_works() {
+    async fn get_by_id() {
         let mut client = create_client();
-        let body = "";
+        let body = "{ _id }";
         let value = &client
             .get_by_id("09139a58-311b-4779-8fa4-723f19242a8e")
             .body(body)
