@@ -3,11 +3,15 @@ mod config;
 mod error;
 mod query;
 
+use dotenv::dotenv;
 use client::SanityClient;
 use config::SanityConfig;
 
 pub fn create_client() -> SanityClient {
-    let config = SanityConfig::new("m9whymrq".to_string(), "production".to_string());
+    dotenv().ok();
+    let sanity_project_id = std::env::var("SANITY_PROJECT_ID").expect("SANITY_PROJECT_ID must be set");
+    let sanity_dataset = std::env::var("SANITY_DATASET").expect("SANITY_DATASET must be set");
+    let config = SanityConfig::new(sanity_project_id, sanity_dataset);
     SanityClient::new(config)
 }
 
@@ -32,6 +36,5 @@ mod tests {
             .body(body)
             .send().await;
         println!("Value: {}", value);
-        println!("item is cool");
     }
 }
