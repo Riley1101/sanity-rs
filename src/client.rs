@@ -1,7 +1,6 @@
 use crate::config::SanityConfig;
 use crate::error::FetchError;
 use crate::fetch::{fetch_json, DeserializeFetch};
-use reqwest::Client as ReqwestClient;
 use std::fmt::Display;
 
 #[derive(Default)]
@@ -20,7 +19,6 @@ impl RequestPayload {
 #[allow(dead_code)]
 pub struct SanityClient {
     config: SanityConfig,
-    client: ReqwestClient,
     payload: RequestPayload,
 }
 
@@ -29,7 +27,6 @@ impl SanityClient {
     pub fn new(config: SanityConfig) -> Self {
         Self {
             config,
-            client: ReqwestClient::new(),
             payload: RequestPayload::default(),
         }
     }
