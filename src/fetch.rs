@@ -15,7 +15,8 @@ pub trait DeserializeFetch: for<'de> Deserialize<'de> {}
 impl<T> DeserializeFetch for T where T: for<'de> Deserialize<'de> {}
 
 #[allow(dead_code)]
-pub async fn fetch_json<T: DeserializeFetch>(uri: Uri) -> Result<T, FetchError> {
+pub async fn fetch_json<T: DeserializeFetch>(uri: String) -> Result<T, FetchError> {
+    let uri = uri.parse::<Uri>().expect("Invalid URL");
     let host = uri.host().expect("Expected host to be a string");
     let port = uri.port_u16().unwrap_or(80);
     let addr = format!("{}:{}", host, port);
@@ -30,7 +31,6 @@ pub async fn fetch_json<T: DeserializeFetch>(uri: Uri) -> Result<T, FetchError> 
     });
 
     let authority = uri.authority().unwrap().clone();
-
     let req = Request::builder()
         .uri(uri)
         .header(hyper::header::HOST, authority.as_str())
@@ -66,7 +66,6 @@ mod tests {
             Ok(response) => Some(response),
             Err(_) => None,
         };
-        println!("{:?}", response);
         assert_ne!(response, None);
     }
 }

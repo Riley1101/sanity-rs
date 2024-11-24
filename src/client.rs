@@ -1,4 +1,6 @@
 use crate::config::SanityConfig;
+use crate::error::FetchError;
+use crate::fetch::{fetch_json, DeserializeFetch};
 use reqwest::Client as ReqwestClient;
 use std::fmt::Display;
 
@@ -38,12 +40,11 @@ impl SanityClient {
         self
     }
 
-    pub async fn send(&mut self) -> String {
-        println!("Query: {}", self.get_query());
+    pub async fn send<T: DeserializeFetch>(&mut self) -> Result<T, FetchError> {
+        // TODO! Please parse this url elegently
         let req = self.get_query();
-        let client = reqwest::Client::new();
-        let res = client.get(req).send().await.unwrap();
-        res.text().await.unwrap()
+        println!("Query: {}", req);
+        fetch_json(req).await
     }
 
     fn get_query(&self) -> String {
@@ -65,7 +66,7 @@ impl SanityClient {
     /// Get a single document from the Sanity API
     pub fn get_by_id(&mut self, id: &str) -> &mut Self {
         let url = self.generate_base_url();
-        let query = format!("*[_id == \"{}\"]", id);
+        let query = format!("*[_id == \'{}\']", id);
         match &self.payload.query {
             Some(_) => {}
             None => {

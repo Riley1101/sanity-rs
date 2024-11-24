@@ -1,16 +1,17 @@
 mod client;
 mod config;
 mod error;
-mod query;
 mod fetch;
+mod query;
 
-use dotenv::dotenv;
 use client::SanityClient;
 use config::SanityConfig;
+use dotenv::dotenv;
 
 pub fn create_client() -> SanityClient {
     dotenv().ok();
-    let sanity_project_id = std::env::var("SANITY_PROJECT_ID").expect("SANITY_PROJECT_ID must be set");
+    let sanity_project_id =
+        std::env::var("SANITY_PROJECT_ID").expect("SANITY_PROJECT_ID must be set");
     let sanity_dataset = std::env::var("SANITY_DATASET").expect("SANITY_DATASET must be set");
     let config = SanityConfig::new(sanity_project_id, sanity_dataset);
     SanityClient::new(config)
@@ -18,8 +19,15 @@ pub fn create_client() -> SanityClient {
 
 #[cfg(test)]
 mod tests {
+    use serde::Deserialize;
     use std::time::Duration;
+
     use super::*;
+
+    #[derive(Deserialize, Debug)]
+    struct Document {
+        _id: String,
+    }
 
     #[tokio::test]
     async fn tokio_async_test() {
@@ -32,10 +40,18 @@ mod tests {
     async fn get_by_id() {
         let mut client = create_client();
         let body = "{ _id }";
-        let value = &client
+        let value: Result<Document, error::FetchError> = client
             .get_by_id("09139a58-311b-4779-8fa4-723f19242a8e")
             .body(body)
-            .send().await;
-        println!("Value: {}", value);
+            .send()
+            .await;
+        match value {
+            Ok(value) => {
+                println!("{:?}", value);
+            }
+            Err(e) => {
+                println!("{:?}", e);
+            }
+        };
     }
 }

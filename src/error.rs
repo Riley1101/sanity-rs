@@ -14,3 +14,9 @@ pub enum FetchError {
     #[error("Invalid host : {0}")]
     InvalidHost(#[from] std::io::Error),
 }
+
+#[derive(Error, Debug)]
+pub enum URLError {
+    #[error("Invalid URL : {0}")]
+    InvalidURL(#[from] std::io::Error),
+}
