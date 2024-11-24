@@ -10,4 +10,7 @@ pub enum FetchError {
 
     #[error("Invalid response error: {0}")]
     InvalidResponse(#[from] serde_json::Error),
+
+    #[error("Invalid host : {0}")]
+    InvalidHost(#[from] std::io::Error),
 }

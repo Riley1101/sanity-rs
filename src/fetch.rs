@@ -20,7 +20,7 @@ pub async fn fetch_json<T: DeserializeFetch>(uri: Uri) -> Result<T, FetchError> 
     let port = uri.port_u16().unwrap_or(80);
     let addr = format!("{}:{}", host, port);
 
-    let stream = TcpStream::connect(addr).await.unwrap();
+    let stream = TcpStream::connect(addr).await?;
     let io = TokioIo::<TcpStream>::new(stream);
     let (mut sender, conn) = hyper::client::conn::http1::handshake(io).await?;
     tokio::task::spawn(async move {
