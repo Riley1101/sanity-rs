@@ -47,6 +47,7 @@ mod tests {
     use super::*;
     use serde::{Deserialize, Serialize};
 
+    #[allow(non_snake_case)]
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Todo {
         userId: u32,

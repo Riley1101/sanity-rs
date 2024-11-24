@@ -1,6 +1,7 @@
+#[allow(dead_code)]
 use std::fmt::Display;
 
-enum ClientPerspective {
+pub enum ClientPerspective {
     Raw,
     Draft,
     Live,
