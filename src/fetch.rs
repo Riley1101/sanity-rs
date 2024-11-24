@@ -1,14 +1,21 @@
+use crate::error::FetchError;
 use bytes::Bytes;
 use http_body_util::{BodyExt, Empty};
 use hyper::{body::Buf, Request, Uri};
 use hyper_util::rt::TokioIo;
-use serde::de;
+use serde::Deserialize;
 use serde_json::from_reader;
 use tokio::net::TcpStream;
 
-pub async fn fetch_json<T: de::DeserializeOwned>(
-    uri: Uri,
-) -> Result<T, Box<dyn std::error::Error>> {
+#[allow(dead_code)]
+///  A data structure that can be deserialized without borrowing any data from the deserializer.
+/// This is primarily useful for trait bounds on functions. 
+/// See: https://rust-lang.github.io/hashbrown/serde/de/trait.DeserializeOwned.html
+pub trait DeserializeFetch: for<'de> Deserialize<'de> {}
+impl<T> DeserializeFetch for T where T: for<'de> Deserialize<'de> {}
+
+#[allow(dead_code)]
+pub async fn fetch_json<T: DeserializeFetch>(uri: Uri) -> Result<T, FetchError> {
     let host = uri.host().expect("Expected host to be a string");
     let port = uri.port_u16().unwrap_or(80);
     let addr = format!("{}:{}", host, port);
@@ -27,8 +34,7 @@ pub async fn fetch_json<T: de::DeserializeOwned>(
     let req = Request::builder()
         .uri(uri)
         .header(hyper::header::HOST, authority.as_str())
-        .body(Empty::<Bytes>::new())
-        .unwrap();
+        .body(Empty::<Bytes>::new())?;
     let res = sender.send_request(req).await?;
     let body = res.collect().await?.aggregate();
 
@@ -38,8 +44,8 @@ pub async fn fetch_json<T: de::DeserializeOwned>(
 
 #[cfg(test)]
 mod tests {
-    use serde::{Deserialize, Serialize};
     use super::*;
+    use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Serialize, Deserialize, PartialEq)]
     struct Todo {
@@ -50,11 +56,11 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn fetch_test() {
+    async fn fetch_get_test() {
         let uri = "http://jsonplaceholder.typicode.com/todos/1"
             .parse()
             .unwrap();
-        let response: Result<Todo, Box<dyn std::error::Error>> = fetch_json(uri).await;
+        let response: Result<Todo, FetchError> = fetch_json(uri).await;
         let response = match response {
             Ok(response) => Some(response),
             Err(_) => None,

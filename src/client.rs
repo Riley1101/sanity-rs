@@ -1,5 +1,4 @@
 use crate::config::SanityConfig;
-use crate::fetch::fetch_json;
 use reqwest::Client as ReqwestClient;
 use std::fmt::Display;
 
@@ -31,7 +30,7 @@ impl SanityClient {
             payload: RequestPayload::default(),
         }
     }
-    
+
     /// Set the body of the request
     pub fn body(&mut self, body: &str) -> &mut Self {
         self.payload.set_body(body);
