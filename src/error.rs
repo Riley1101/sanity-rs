@@ -18,5 +18,14 @@ pub enum FetchError {
 #[derive(Error, Debug)]
 pub enum URLError {
     #[error("Invalid URL : {0}")]
-    InvalidURL(#[from] std::io::Error),
+    InvalidURL(#[from] url::ParseError),
+}
+
+#[derive(Error, Debug)]
+pub enum ConfigurationError {
+    #[error("Missing project ID")]
+    MissingProjectID,
+
+    #[error("Missing dataset")]
+    MissingDataset,
 }

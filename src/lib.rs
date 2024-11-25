@@ -3,16 +3,21 @@ mod config;
 mod error;
 mod fetch;
 mod query;
+mod url;
 
 use client::SanityClient;
 use config::SanityConfig;
 use dotenv::dotenv;
+use error::ConfigurationError;
 
 pub fn create_client() -> SanityClient {
     dotenv().ok();
-    let sanity_project_id =
-        std::env::var("SANITY_PROJECT_ID").expect("SANITY_PROJECT_ID must be set");
-    let sanity_dataset = std::env::var("SANITY_DATASET").expect("SANITY_DATASET must be set");
+    let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+        .map_err(|_| ConfigurationError::MissingProjectID)
+        .expect("Missing project ID");
+    let sanity_dataset = std::env::var("SANITY_DATASET")
+        .map_err(|_| ConfigurationError::MissingDataset)
+        .expect("Missing dataset");
     let config = SanityConfig::new(sanity_project_id, sanity_dataset);
     SanityClient::new(config)
 }
@@ -33,10 +38,12 @@ mod tests {
     async fn tokio_async_test() {
         let start = std::time::Instant::now();
         tokio::time::sleep(Duration::from_millis(500)).await;
-        println!("{:?}ms", start.elapsed().as_millis());
+        let elapsed = start.elapsed();
+        assert!(elapsed >= Duration::from_millis(500));
     }
 
     #[tokio::test]
+    #[ignore]
     async fn get_by_id() {
         let mut client = create_client();
         let body = "{ _id }";
