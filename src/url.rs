@@ -1,7 +1,10 @@
+use std::fmt::Display;
+
 use crate::error::URLError;
 use url::form_urlencoded;
 use url::Url;
 
+#[derive(Debug)]
 pub struct SanityURL {
     project_id: String,
     host: String,
@@ -10,12 +13,25 @@ pub struct SanityURL {
     query: String,
 }
 
+impl Display for SanityURL {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Sanity URL: {}",
+            format!(
+                "https://{}.{}/{}/data/query/{}?query={}",
+                self.project_id, self.host, self.api_version, self.dataset, self.query
+            )
+        )
+    }
+}
+
 impl SanityURL {
     pub fn new() -> Self {
         Self {
             project_id: "".to_string(),
             host: "api.sanity.io".to_string(),
-            api_version: "v2021-10-04".to_string(),
+            api_version: "v2022-03-07".to_string(),
             dataset: "production".to_string(),
             query: "".to_string(),
         }
@@ -26,23 +42,26 @@ impl SanityURL {
         self
     }
 
-    pub fn api_version(&mut self, api_version: String) -> &mut Self {
+    pub fn api_version(&mut self, api_version: &String) -> &mut Self {
         self.api_version = api_version.to_string();
         self
     }
 
-    pub fn project_id(&mut self, project_id: String) -> &mut Self {
+    pub fn project_id(&mut self, project_id: &String) -> &mut Self {
         self.project_id = project_id.to_string();
         self
     }
 
-    pub fn dataset(&mut self, dataset: String) -> &mut Self {
+    pub fn dataset(&mut self, dataset: &String) -> &mut Self {
         self.dataset = dataset.to_string();
         self
     }
 
-    pub fn query(&mut self, query: String) -> &mut Self {
-        let uri = query.replace(" ", "").trim().replace("\n", "");
+    pub fn query(&mut self, query: &str) -> &mut Self {
+        let uri = String::from(query)
+            .replace(" ", "")
+            .trim()
+            .replace("\n", "");
         let encoded_query = form_urlencoded::byte_serialize(uri.as_bytes()).collect::<String>();
         self.query = encoded_query;
         self
@@ -65,11 +84,11 @@ mod test {
     #[test]
     fn parse_simple() {
         let sanity_url = SanityURL::new()
-            .project_id("abc123".to_string())
-            .dataset("production".to_string())
-            .api_version("v2022-03-07".to_string())
+            .project_id(&"abc123".to_string())
+            .dataset(&"production".to_string())
+            .api_version(&"v2022-03-07".to_string())
             .host("api.sanity.io".to_string())
-            .query("".to_string())
+            .query("")
             .build()
             .unwrap();
         assert_eq!(
@@ -88,11 +107,11 @@ mod test {
             _updatedAt
         }"#;
         let sanity_url = SanityURL::new()
-            .project_id("abc123".to_string())
-            .dataset("production".to_string())
-            .api_version("v2022-03-07".to_string())
+            .project_id(&"abc123".to_string())
+            .dataset(&"production".to_string())
+            .api_version(&"v2022-03-07".to_string())
             .host("api.sanity.io".to_string())
-            .query(query.to_string())
+            .query(query)
             .build()
             .unwrap();
         assert_eq!(
@@ -110,11 +129,11 @@ mod test {
             categories[]->title
         }"#;
         let sanity_url = SanityURL::new()
-            .project_id("abc123".to_string())
-            .dataset("blog".to_string())
-            .api_version("v2023-01-01".to_string())
+            .project_id(&"abc123".to_string())
+            .dataset(&"blog".to_string())
+            .api_version(&"v2023-01-01".to_string())
             .host("api.sanity.io".to_string())
-            .query(query.to_string())
+            .query(query)
             .build()
             .unwrap();
         assert_eq!(
@@ -126,11 +145,11 @@ mod test {
     #[test]
     fn empty_query() {
         let sanity_url = SanityURL::new()
-            .project_id("xyz456".to_string())
-            .dataset("test".to_string())
-            .api_version("v2023-05-01".to_string())
+            .project_id(&"xyz456".to_string())
+            .dataset(&"test".to_string())
+            .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
-            .query("".to_string())
+            .query("")
             .build()
             .unwrap();
         assert_eq!(
@@ -147,11 +166,11 @@ mod test {
             price
         }"#;
         let sanity_url = SanityURL::new()
-            .project_id("abc123".to_string())
-            .dataset("store".to_string())
-            .api_version("v2023-05-01".to_string())
+            .project_id(&"abc123".to_string())
+            .dataset(&"store".to_string())
+            .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
-            .query(query.to_string())
+            .query(query)
             .build()
             .unwrap();
         assert_eq!(
@@ -163,11 +182,11 @@ mod test {
     fn one_line_query() {
         let query = r#"*[_type == "post"]{title, author}"#;
         let sanity_url = SanityURL::new()
-            .project_id("abc123".to_string())
-            .dataset("blog".to_string())
-            .api_version("v2023-05-01".to_string())
+            .project_id(&"abc123".to_string())
+            .dataset(&"blog".to_string())
+            .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
-            .query(query.to_string())
+            .query(query)
             .build()
             .unwrap();
         assert_eq!(

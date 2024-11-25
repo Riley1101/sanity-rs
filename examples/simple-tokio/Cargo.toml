@@ -1,0 +1,9 @@
+[package]
+name = "simple-tokio"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+sanity-rs = { path = "../../" }
+serde = { version = "1.0.215", features = ["derive"] }

@@ -1,6 +1,6 @@
 mod client;
 mod config;
-mod error;
+pub mod error;
 mod fetch;
 mod query;
 mod url;
@@ -8,7 +8,7 @@ mod url;
 use client::SanityClient;
 use config::SanityConfig;
 use dotenv::dotenv;
-use error::ConfigurationError;
+use error::{ConfigurationError, FetchError};
 
 pub fn create_client() -> SanityClient {
     dotenv().ok();
@@ -24,14 +24,24 @@ pub fn create_client() -> SanityClient {
 
 #[cfg(test)]
 mod tests {
-    use serde::Deserialize;
+    use serde::{Deserialize, Serialize};
     use std::time::Duration;
 
     use super::*;
 
-    #[derive(Deserialize, Debug)]
+    #[derive(Deserialize, Debug, Serialize)]
     struct Document {
         _id: String,
+        _createdAt: String,
+    }
+
+    #[allow(non_snake_case)]
+    #[derive(Debug, Serialize, Deserialize)]
+    struct QueryResult {
+        query: String,
+        result: Vec<Document>,
+        syncTags: Vec<String>,
+        ms: usize,
     }
 
     #[tokio::test]
@@ -43,22 +53,14 @@ mod tests {
     }
 
     #[tokio::test]
-    #[ignore]
     async fn get_by_id() {
         let mut client = create_client();
-        let body = "{ _id }";
-        let value: Result<Document, error::FetchError> = client
-            .get_by_id("09139a58-311b-4779-8fa4-723f19242a8e")
-            .body(body)
-            .send()
-            .await;
-        match value {
-            Ok(value) => {
-                println!("{:?}", value);
-            }
-            Err(e) => {
-                println!("{:?}", e);
-            }
-        };
+        let query = r#"
+         *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
+           _id,
+            _createdAt
+         }
+        "#;
+        client.query(query).await;
     }
 }
