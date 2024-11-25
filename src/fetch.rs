@@ -1,18 +1,47 @@
-use crate::error::FetchError;
+use crate::error::{FetchError, URLError};
 use bytes::Bytes;
 use http_body_util::{BodyExt, Empty};
 use hyper::{body::Buf, Request, Uri};
 use hyper_util::rt::TokioIo;
-use serde::{de::DeserializeOwned, Deserialize};
+use serde::{de::DeserializeOwned, Deserialize, Serialize};
 use serde_json::from_reader;
 use tokio::net::TcpStream;
+
+#[allow(non_snake_case)]
+#[derive(Debug, Serialize, Deserialize)]
+struct QueryResult {
+    query: String,
+    result: Vec<Record>,
+    syncTags: Vec<String>,
+    ms: u64,
+}
+
+#[allow(non_snake_case)]
+#[derive(Debug, Serialize, Deserialize)]
+struct Record {
+    _id: String,
+    _createdAt: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct FailedQuery {
+    description: String,
+    end: u64,
+    query: String,
+    start: u64,
+    r#type: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct FailedResult {
+    error: FailedQuery,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct Data<T>(T);
 
-#[allow(dead_code)]
 pub async fn fetch_json<T: DeserializeOwned>(uri: String) -> Result<T, FetchError> {
-    let uri = uri.parse::<Uri>().expect("Invalid URL");
+    let uri = uri.parse::<Uri>()?;
     let host = uri.host().expect("Expected host to be a string");
     let port = uri.port_u16().unwrap_or(80);
     let addr = format!("{}:{}", host, port);
@@ -56,7 +85,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_schema() {
+    async fn serialize_test() {
         let json_data = r#"
     {
         "query": " *[_id == \"09139a58-311b-4779-8fa4-723f19242a8e\"]{\n   _id,\n    _createdAt\n }",
@@ -91,48 +120,10 @@ mod tests {
         assert_ne!(response, None);
     }
 
-    #[derive(Debug, Serialize, Deserialize, PartialEq)]
-    #[allow(non_snake_case)]
-    pub struct Document {
-        _id: String,
-        _createdAt: String,
-    }
-
-    #[allow(non_snake_case)]
-    #[derive(Debug, Serialize, Deserialize)]
-    struct QueryResult {
-        query: String,
-        result: Vec<Record>,
-        syncTags: Vec<String>,
-        ms: u64,
-    }
-
-    #[allow(non_snake_case)]
-    #[derive(Debug, Serialize, Deserialize)]
-    struct Record {
-        _id: String,
-        _createdAt: String,
-    }
-
-    #[derive(Debug, Serialize, Deserialize)]
-    struct FailedQuery {
-        description: String,
-        end: u64,
-        query: String,
-        start: u64,
-        r#type: String,
-    }
-
-    #[derive(Debug, Serialize, Deserialize)]
-    struct FailedResult {
-        error: FailedQuery,
-    }
-
-    #[ignore]
     #[tokio::test]
     async fn fetch_sanity_url() {
-        let response: Result<FailedResult, FetchError> =
-            fetch_json("https://m9whymrq.api.sanity.io/v2022-03-07/data/query/production?query=+*%5B_id+%3D%3D+%2209139a58-311b-4779-8fa4-723f19242a8e%22%5D%7B%0A+++_id%2C%0A++++_createdAt%0A+%7D".to_string()).await;
+        let response: Result<QueryResult, FetchError> =
+            fetch_json("https://m9whymrq.api.sanity.io/v2022-03-07/data/query/production?query=+*%5B_id+%3D%3D+%2209139a58-311b-4779-8fa4-723f19242a8e%22%5D%7B%0A+++_id%2C%0A++++_createdAt%0A+%7D&perspective=published".to_string()).await;
         let _response = match response {
             Ok(response) => Some(response),
             Err(e) => {

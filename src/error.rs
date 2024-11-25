@@ -13,6 +13,9 @@ pub enum FetchError {
 
     #[error("Invalid host : {0}")]
     InvalidHost(#[from] std::io::Error),
+
+    #[error("Invalid host : {0}")]
+    InvalidURL(#[from] hyper::http::uri::InvalidUri),
 }
 
 #[derive(Error, Debug)]
