@@ -67,21 +67,9 @@ impl SanityClient {
 
         // TODO! replace this with hyper
         let value = self.client.get(url.unwrap().as_str()).send().await.unwrap();
-
         let res = value.text().await.unwrap();
-
-        match serde_json::from_str::<QueryResult>(res.as_str()) {
-            Ok(parsed) => {
-                let documents = parsed.result;
-                for doc in documents {
-                    println!("_createdAt : {:?}", doc._createdAt);
-                }
-                println!("Parsed JSON successfully");
-            }
-            Err(e) => eprintln!("Failed to parse JSON: {}", e),
-        }
-
-        println!("{}", res);
+        let result = serde_json::from_str::<QueryResult>(res.as_str());
+        assert!(result.is_ok());
     }
 }
 

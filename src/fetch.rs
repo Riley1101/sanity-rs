@@ -78,7 +78,6 @@ mod tests {
         }
     }
 
-    #[ignore]
     #[tokio::test]
     async fn fetch_get_test() {
         let uri = "http://jsonplaceholder.typicode.com/todos/1"
