@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use std::fmt::Display;
 
 use crate::error::URLError;
@@ -15,14 +16,7 @@ pub struct SanityURL {
 
 impl Display for SanityURL {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Sanity URL: {}",
-            format!(
-                "https://{}.{}/{}/data/query/{}?query={}",
-                self.project_id, self.host, self.api_version, self.dataset, self.query
-            )
-        )
+        write!(f, "Sanity URL: https://{}.{}", self.project_id, self.host)
     }
 }
 

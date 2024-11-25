@@ -8,7 +8,7 @@ mod url;
 use client::SanityClient;
 use config::SanityConfig;
 use dotenv::dotenv;
-use error::{ConfigurationError, FetchError};
+use error::ConfigurationError;
 
 pub fn create_client() -> SanityClient {
     dotenv().ok();
@@ -29,6 +29,7 @@ mod tests {
 
     use super::*;
 
+    #[allow(dead_code, non_snake_case)]
     #[derive(Deserialize, Debug, Serialize)]
     struct Document {
         _id: String,

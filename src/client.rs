@@ -22,6 +22,7 @@ struct Record {
 }
 
 #[derive(Default)]
+#[allow(dead_code)]
 pub struct RequestPayload {
     pub query: Option<String>,
     pub body: Option<String>,

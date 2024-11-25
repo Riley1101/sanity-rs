@@ -73,7 +73,7 @@ mod tests {
     }
     "#;
         match serde_json::from_str::<QueryResult>(json_data) {
-            Ok(_parsed) => {},
+            Ok(_parsed) => {}
             Err(e) => eprintln!("Failed to parse JSON: {}", e),
         }
     }
@@ -124,7 +124,6 @@ mod tests {
         r#type: String,
     }
 
-
     #[derive(Debug, Serialize, Deserialize)]
     struct FailedResult {
         error: FailedQuery,
@@ -144,7 +143,7 @@ mod tests {
         //    .unwrap();
         let response: Result<FailedResult, FetchError> =
             fetch_json("https://m9whymrq.api.sanity.io/v2022-03-07/data/query/production?query=+*%5B_id+%3D%3D+%2209139a58-311b-4779-8fa4-723f19242a8e%22%5D%7B%0A+++_id%2C%0A++++_createdAt%0A+%7D".to_string()).await;
-        let response = match response {
+        let _response = match response {
             Ok(response) => Some(response),
             Err(e) => {
                 println!("Error: {:?}", e.to_string());
