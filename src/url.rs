@@ -159,4 +159,20 @@ mod test {
             "https://abc123.api.sanity.io/v2023-05-01/data/query/store?query=*%5Bname%3D%3D%22O%27Reilly%22%26%26price%3C100.0%5D%7Bname%2Cprice%7D"
         );
     }
+    #[test]
+    fn one_line_query() {
+        let query = r#"*[_type == "post"]{title, author}"#;
+        let sanity_url = SanityURL::new()
+            .project_id("abc123".to_string())
+            .dataset("blog".to_string())
+            .api_version("v2023-05-01".to_string())
+            .host("api.sanity.io".to_string())
+            .query(query.to_string())
+            .build()
+            .unwrap();
+        assert_eq!(
+        sanity_url.as_str(),
+        "https://abc123.api.sanity.io/v2023-05-01/data/query/blog?query=*%5B_type%3D%3D%22post%22%5D%7Btitle%2Cauthor%7D"
+    );
+    }
 }
