@@ -132,15 +132,6 @@ mod tests {
     #[ignore]
     #[tokio::test]
     async fn fetch_sanity_url() {
-        //let query = r#"*[_type == "post"]{title, author}"#;
-        //let sanity_url = SanityURL::new()
-        //    .project_id(&"m9whymrq".to_string())
-        //    .dataset(&"production".to_string())
-        //    .api_version("v2023-05-01".to_string())
-        //    .host("api.sanity.io".to_string())
-        //    .query(&query.to_string())
-        //    .build()
-        //    .unwrap();
         let response: Result<FailedResult, FetchError> =
             fetch_json("https://m9whymrq.api.sanity.io/v2022-03-07/data/query/production?query=+*%5B_id+%3D%3D+%2209139a58-311b-4779-8fa4-723f19242a8e%22%5D%7B%0A+++_id%2C%0A++++_createdAt%0A+%7D".to_string()).await;
         let _response = match response {

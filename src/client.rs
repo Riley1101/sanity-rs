@@ -64,7 +64,10 @@ impl SanityClient {
             .dataset(&self.config.dataset)
             .query(body)
             .build();
+
+        // TODO! replace this with hyper
         let value = self.client.get(url.unwrap().as_str()).send().await.unwrap();
+
         let res = value.text().await.unwrap();
 
         match serde_json::from_str::<QueryResult>(res.as_str()) {
