@@ -1,4 +1,5 @@
 use crate::error::URLError;
+use url::form_urlencoded;
 use url::Url;
 
 pub struct SanityURL {
@@ -41,7 +42,9 @@ impl SanityURL {
     }
 
     pub fn query(&mut self, query: String) -> &mut Self {
-        self.query = query.replace(" ", "").trim().replace("\n", "");
+        let uri = query.replace(" ", "").trim().replace("\n", "");
+        let encoded_query = form_urlencoded::byte_serialize(uri.as_bytes()).collect::<String>();
+        self.query = encoded_query;
         self
     }
 
@@ -58,6 +61,7 @@ impl SanityURL {
 #[cfg(test)]
 mod test {
     use super::*;
+
     #[test]
     fn parse_simple() {
         let sanity_url = SanityURL::new()
@@ -66,18 +70,12 @@ mod test {
             .api_version("v2022-03-07".to_string())
             .host("api.sanity.io".to_string())
             .query("".to_string())
-            .build();
-        match sanity_url {
-            Ok(url) => {
-                assert_eq!(
-                    url.as_str(),
-                    "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query="
-                );
-            }
-            Err(e) => {
-                panic!("{:?}", e);
-            }
-        };
+            .build()
+            .unwrap();
+        assert_eq!(
+            sanity_url.as_str(),
+            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query="
+        );
     }
 
     #[test]
@@ -99,7 +97,66 @@ mod test {
             .unwrap();
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query=*[_id==%2209139a58-311b-4779-8fa4-723f19242a8e%22]{_id,_type,_createdAt,_updatedAt}"
+            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query=*%5B_id%3D%3D%2209139a58-311b-4779-8fa4-723f19242a8e%22%5D%7B_id%2C_type%2C_createdAt%2C_updatedAt%7D"
+        );
+    }
+
+    #[test]
+    fn query_with_filter() {
+        let query = r#"
+        *[type == "post" && published == true]{
+            title,
+            author,
+            categories[]->title
+        }"#;
+        let sanity_url = SanityURL::new()
+            .project_id("abc123".to_string())
+            .dataset("blog".to_string())
+            .api_version("v2023-01-01".to_string())
+            .host("api.sanity.io".to_string())
+            .query(query.to_string())
+            .build()
+            .unwrap();
+        assert_eq!(
+            sanity_url.as_str(),
+            "https://abc123.api.sanity.io/v2023-01-01/data/query/blog?query=*%5Btype%3D%3D%22post%22%26%26published%3D%3Dtrue%5D%7Btitle%2Cauthor%2Ccategories%5B%5D-%3Etitle%7D"
+        );
+    }
+
+    #[test]
+    fn empty_query() {
+        let sanity_url = SanityURL::new()
+            .project_id("xyz456".to_string())
+            .dataset("test".to_string())
+            .api_version("v2023-05-01".to_string())
+            .host("api.sanity.io".to_string())
+            .query("".to_string())
+            .build()
+            .unwrap();
+        assert_eq!(
+            sanity_url.as_str(),
+            "https://xyz456.api.sanity.io/v2023-05-01/data/query/test?query="
+        );
+    }
+
+    #[test]
+    fn query_with_special_characters() {
+        let query = r#"
+        *[name == "O'Reilly" && price < 100.0]{
+            name,
+            price
+        }"#;
+        let sanity_url = SanityURL::new()
+            .project_id("abc123".to_string())
+            .dataset("store".to_string())
+            .api_version("v2023-05-01".to_string())
+            .host("api.sanity.io".to_string())
+            .query(query.to_string())
+            .build()
+            .unwrap();
+        assert_eq!(
+            sanity_url.as_str(),
+            "https://abc123.api.sanity.io/v2023-05-01/data/query/store?query=*%5Bname%3D%3D%22O%27Reilly%22%26%26price%3C100.0%5D%7Bname%2Cprice%7D"
         );
     }
 }
