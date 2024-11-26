@@ -1,8 +1,8 @@
 mod client;
 mod config;
 pub mod error;
-mod query;
 mod url;
+pub mod orm;
 
 use serde::{Deserialize, Serialize};
 use client::SanityClient;

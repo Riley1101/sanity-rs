@@ -2,17 +2,20 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum RequestError {
-    #[error("Request error: {0}")]
+    #[error("URL Parsing error: {0}")]
     URLParsingError(#[from] URLError),
 
-    #[error("Request error: {0}")]
+    #[error("Reqwest  error: {0}")]
     ReqwestError(#[from] reqwest::Error),
 
-    #[error("Request error: {0}")]
+    #[error("JSON parsing error: {0}")]
     JsonParsingError(#[from] serde_json::Error),
 
-    #[error("Request error: {0}")]
+    #[error("Missing Env error: {0}")]
     MissingEnvVarError(#[from] std::env::VarError),
+
+    #[error("Request error: {0}")]
+    StringParsingError(String),
 }
 
 #[derive(Error, Debug)]

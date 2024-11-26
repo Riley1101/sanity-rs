@@ -1,6 +1,7 @@
 use crate::config::SanityConfig;
 use crate::error::RequestError;
 use crate::url::SanityURL;
+
 use reqwest::Client as ReqwestClient;
 use serde::de::DeserializeOwned;
 use std::fmt::Display;
@@ -58,8 +59,15 @@ impl SanityClient {
         Ok(self)
     }
 
-    pub fn string(&self) -> String {
-        self.payload.result.as_ref().unwrap().to_string()
+    /// Get the response as a string
+    pub fn string(&self) -> Result<String, RequestError> {
+        self.payload
+            .result
+            .as_ref()
+            .map_or(
+                Err(RequestError::StringParsingError("No response found".to_string())),
+                |res| Ok(res.to_string()),
+            )
     }
 
     /// Parse the JSON response
