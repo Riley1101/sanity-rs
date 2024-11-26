@@ -19,7 +19,7 @@ struct Record {
 }
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), RequestError> {
     let mut client = create_client();
     let query = r#"
          *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
@@ -27,8 +27,15 @@ async fn main() {
            _createdAt
          }
         "#;
-    let value: Result<QueryResult, RequestError> = client.query(query).await.unwrap().json();
-    println!("{:?}", value);
+    let value: Result<QueryResult, RequestError> = client.query(query).await?.json();
+
+    if let Ok(result) = value {
+        for record in result.result {
+            println!("ID: {}, Created At: {}", record._id, record._createdAt);
+        }
+    }
+
+    Ok(())
 }
 
 #[cfg(test)]
