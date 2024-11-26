@@ -10,6 +10,9 @@ pub enum RequestError {
 
     #[error("Request error: {0}")]
     JsonParsingError(#[from] serde_json::Error),
+
+    #[error("Request error: {0}")]
+    MissingEnvVarError(#[from] std::env::VarError),
 }
 
 #[derive(Error, Debug)]

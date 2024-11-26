@@ -77,7 +77,7 @@ mod tests {
         let query = r#"
          *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
            _id,
-            _createdAt
+           _createdAt
          }
         "#;
         let value : Result<QueryResult, RequestError>= client.query(query).await.unwrap().json();
