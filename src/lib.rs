@@ -1,14 +1,31 @@
 mod client;
 mod config;
 pub mod error;
-mod fetch;
 mod query;
 mod url;
 
+use serde::{Deserialize, Serialize};
 use client::SanityClient;
 use config::SanityConfig;
 use dotenv::dotenv;
 use error::ConfigurationError;
+
+#[allow(non_snake_case)]
+#[derive(Debug, Serialize, Deserialize)]
+struct QueryResult {
+    query: String,
+    result: Vec<Record>,
+    syncTags: Vec<String>,
+    ms: u64,
+}
+
+#[allow(non_snake_case)]
+#[derive(Debug, Serialize, Deserialize)]
+struct Record {
+    _id: String,
+    _createdAt: String,
+}
+
 
 pub fn create_client() -> SanityClient {
     dotenv().ok();
@@ -26,6 +43,7 @@ pub fn create_client() -> SanityClient {
 mod tests {
     use serde::{Deserialize, Serialize};
     use std::time::Duration;
+    use error::RequestError;
 
     use super::*;
 
@@ -62,6 +80,7 @@ mod tests {
             _createdAt
          }
         "#;
-        client.query(query).await;
+        let value : Result<QueryResult, RequestError>= client.query(query).await.unwrap().json();
+        assert_eq!(value.unwrap().result[0]._id, "09139a58-311b-4779-8fa4-723f19242a8e");
     }
 }

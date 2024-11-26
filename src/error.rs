@@ -1,21 +1,15 @@
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum FetchError {
-    #[error("Connection error: {0}")]
-    ConnectionError(#[from] hyper::Error),
+pub enum RequestError {
+    #[error("Request error: {0}")]
+    URLParsingError(#[from] URLError),
 
-    #[error("Invalid request error: {0}")]
-    InvalidRequest(#[from] hyper::http::Error),
+    #[error("Request error: {0}")]
+    ReqwestError(#[from] reqwest::Error),
 
-    #[error("Invalid response error: {0}")]
-    InvalidResponse(#[from] serde_json::Error),
-
-    #[error("Invalid host : {0}")]
-    InvalidHost(#[from] std::io::Error),
-
-    #[error("Invalid host : {0}")]
-    InvalidURL(#[from] hyper::http::uri::InvalidUri),
+    #[error("Request error: {0}")]
+    JsonParsingError(#[from] serde_json::Error),
 }
 
 #[derive(Error, Debug)]

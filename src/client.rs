@@ -1,31 +1,16 @@
-use serde::{Deserialize, Serialize};
-
 use crate::config::SanityConfig;
+use crate::error::RequestError;
 use crate::url::SanityURL;
 use reqwest::Client as ReqwestClient;
+use serde::de::DeserializeOwned;
 use std::fmt::Display;
-
-#[allow(non_snake_case)]
-#[derive(Debug, Serialize, Deserialize)]
-struct QueryResult {
-    query: String,
-    result: Vec<Record>,
-    syncTags: Vec<String>,
-    ms: u64,
-}
-
-#[allow(non_snake_case)]
-#[derive(Debug, Serialize, Deserialize)]
-struct Record {
-    _id: String,
-    _createdAt: String,
-}
 
 #[derive(Default)]
 #[allow(dead_code)]
 pub struct RequestPayload {
     pub query: Option<String>,
     pub body: Option<String>,
+    pub result: Option<String>,
 }
 
 impl RequestPayload {
@@ -58,18 +43,30 @@ impl SanityClient {
         self
     }
 
-    pub async fn query(&mut self, body: &str) {
+    /// Send a query to the Sanity API
+    pub async fn query(&mut self, body: &str) -> Result<&mut Self, RequestError> {
         let url = SanityURL::new()
             .project_id(&self.config.project_id)
             .dataset(&self.config.dataset)
             .query(body)
-            .build();
+            .build()
+            .map_err(RequestError::URLParsingError)?;
 
-        // TODO! replace this with hyper
-        let value = self.client.get(url.unwrap().as_str()).send().await.unwrap();
-        let res = value.text().await.unwrap();
-        let result = serde_json::from_str::<QueryResult>(res.as_str());
-        assert!(result.is_ok());
+        let value = self.client.get(url.as_str()).send().await?;
+        let res = value.text().await?;
+        self.payload.result = Some(res);
+        Ok(self)
+    }
+
+    pub fn string(&self) -> String {
+        self.payload.result.as_ref().unwrap().to_string()
+    }
+
+    /// Parse the JSON response
+    pub fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError> {
+        let res = self.payload.result.as_ref().unwrap();
+        let value: T = serde_json::from_str(res).map_err(RequestError::JsonParsingError)?;
+        Ok(value)
     }
 }
 
