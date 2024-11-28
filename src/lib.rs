@@ -1,14 +1,12 @@
 mod client;
 mod config;
-pub mod error;
 mod url;
+pub mod error;
 pub mod orm;
 
-use serde::{Deserialize, Serialize};
 use client::SanityClient;
 use config::SanityConfig;
-use dotenv::dotenv;
-use error::ConfigurationError;
+use serde::{Deserialize, Serialize};
 
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
@@ -26,24 +24,16 @@ struct Record {
     _createdAt: String,
 }
 
-
-pub fn create_client() -> SanityClient {
-    dotenv().ok();
-    let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
-        .map_err(|_| ConfigurationError::MissingProjectID)
-        .expect("Missing project ID");
-    let sanity_dataset = std::env::var("SANITY_DATASET")
-        .map_err(|_| ConfigurationError::MissingDataset)
-        .expect("Missing dataset");
-    let config = SanityConfig::new(sanity_project_id, sanity_dataset);
+pub fn create_client(config: SanityConfig) -> SanityClient {
     SanityClient::new(config)
 }
 
 #[cfg(test)]
 mod tests {
+    use dotenv::dotenv;
+    use error::{ConfigurationError, RequestError};
     use serde::{Deserialize, Serialize};
     use std::time::Duration;
-    use error::RequestError;
 
     use super::*;
 
@@ -73,14 +63,26 @@ mod tests {
 
     #[tokio::test]
     async fn get_by_query() {
-        let mut client = create_client();
+        dotenv().ok();
+        let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+            .map_err(|_| ConfigurationError::MissingProjectID)
+            .expect("Missing project ID");
+        let sanity_dataset = std::env::var("SANITY_DATASET")
+            .map_err(|_| ConfigurationError::MissingDataset)
+            .expect("Missing dataset");
+        let config = SanityConfig::new(sanity_project_id, sanity_dataset);
+
+        let mut client = create_client(config);
         let query = r#"
          *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
            _id,
            _createdAt
          }
         "#;
-        let value : Result<QueryResult, RequestError>= client.query(query).await.unwrap().json();
-        assert_eq!(value.unwrap().result[0]._id, "09139a58-311b-4779-8fa4-723f19242a8e");
+        let value: Result<QueryResult, RequestError> = client.query(query).await.unwrap().json();
+        assert_eq!(
+            value.unwrap().result[0]._id,
+            "09139a58-311b-4779-8fa4-723f19242a8e"
+        );
     }
 }
