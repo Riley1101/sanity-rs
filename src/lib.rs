@@ -1,6 +1,6 @@
 mod client;
-mod config;
 mod url;
+pub mod config;
 pub mod error;
 pub mod orm;
 
