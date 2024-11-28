@@ -72,7 +72,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn get_by_id() {
+    async fn get_by_query() {
         let mut client = create_client();
         let query = r#"
          *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
