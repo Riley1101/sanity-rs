@@ -6,6 +6,7 @@ use reqwest::Client as ReqwestClient;
 use serde::de::DeserializeOwned;
 use std::fmt::Display;
 
+/// Request Payload for temporary storing query and request body
 #[derive(Default)]
 #[allow(dead_code)]
 pub struct RequestPayload {
@@ -29,7 +30,17 @@ pub struct SanityClient {
 }
 
 impl SanityClient {
-    /// Create a new instance of the SanityClient
+    /// Create a new instance for the SanityClient
+    ///
+    /// Initialize a client instance based on Configuration
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// let sanity_project_id = abc123
+    /// let sanity_dataset = development
+    /// let config = SanityConfig::new(sanity_project_id, sanity_dataset);
+    /// ```
     pub fn new(config: SanityConfig) -> Self {
         Self {
             config,
@@ -39,7 +50,23 @@ impl SanityClient {
     }
 
     /// Set the body of the request
-    pub fn body(&mut self, body: &str) -> &mut Self {
+    /// 
+    /// builder method for setting query body for later usecases.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// let body = r#"
+    ///  {
+    ///    _id,
+    ///    _createdAt,
+    ///    _title,
+    ///  }
+    /// "#;
+    ///
+    /// client.get_by_id().body(body).send().await;
+    /// ```
+    fn body(&mut self, body: &str) -> &mut Self {
         self.payload.set_body(body);
         self
     }

@@ -1,28 +1,11 @@
 mod client;
-mod url;
 pub mod config;
 pub mod error;
 pub mod orm;
+mod url;
 
 use client::SanityClient;
 use config::SanityConfig;
-use serde::{Deserialize, Serialize};
-
-#[allow(non_snake_case)]
-#[derive(Debug, Serialize, Deserialize)]
-struct QueryResult {
-    query: String,
-    result: Vec<Record>,
-    syncTags: Vec<String>,
-    ms: u64,
-}
-
-#[allow(non_snake_case)]
-#[derive(Debug, Serialize, Deserialize)]
-struct Record {
-    _id: String,
-    _createdAt: String,
-}
 
 pub fn create_client(config: SanityConfig) -> SanityClient {
     SanityClient::new(config)
@@ -36,6 +19,13 @@ mod tests {
     use std::time::Duration;
 
     use super::*;
+
+    #[allow(non_snake_case)]
+    #[derive(Debug, Serialize, Deserialize)]
+    struct Record {
+        _id: String,
+        _createdAt: String,
+    }
 
     #[allow(dead_code, non_snake_case)]
     #[derive(Deserialize, Debug, Serialize)]
