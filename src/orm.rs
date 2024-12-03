@@ -1,5 +1,6 @@
 use serde::de::DeserializeOwned;
 
+use std::future::Future;
 use crate::client::SanityClient;
 use crate::error::RequestError;
 use crate::url::SanityURL;
@@ -7,11 +8,7 @@ use crate::url::SanityURL;
 pub trait ORM {
     fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError>;
     fn get_by_id(&mut self, id: &str) -> &mut SanityClient;
-    // fn get_documents<T>(
-    //    &self,
-    //    query: Vec<String>,
-    //    document_ids: &[&str],
-    //) -> Result<T, RequestError>;
+    fn query(&mut self) -> impl Future<Output = ()>;
 }
 
 impl ORM for SanityClient {
@@ -22,12 +19,15 @@ impl ORM for SanityClient {
         self
     }
 
-
     /// Parse the JSON response
     fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError> {
         let res = self.payload.query_result.as_ref().unwrap();
         let value: T = serde_json::from_str(res).map_err(RequestError::JsonParsingError)?;
         Ok(value)
+    }
+
+    async fn query(&mut self) {
+        println!("Querying...");
     }
 }
 
@@ -38,6 +38,7 @@ mod tests {
     use crate::create_client;
     use crate::error::ConfigurationError;
     use crate::error::RequestError;
+    use crate::orm::ORM;
     use dotenv::dotenv;
     use serde::{Deserialize, Serialize};
 
@@ -76,7 +77,7 @@ mod tests {
         let config = SanityConfig::new(sanity_project_id, sanity_dataset);
 
         let mut client = create_client(config);
-        let value = client.get_by_id("09139a58-311b-4779-8fa4-723f19242a8e");
+        let _ = client.get_by_id("09139a58-311b-4779-8fa4-723f19242a8e").query().await;
         Ok(())
     }
 }
