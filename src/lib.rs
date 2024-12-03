@@ -4,7 +4,6 @@ pub mod error;
 pub mod orm;
 mod url;
 
-use orm::ORM;
 use client::SanityClient;
 use config::SanityConfig;
 
@@ -22,6 +21,7 @@ mod tests {
     use serde::{Deserialize, Serialize};
     use std::time::Duration;
     use crate::error::RequestError;
+    use orm::ORM;
 
     use super::*;
 

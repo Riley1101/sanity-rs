@@ -6,7 +6,6 @@ use crate::{
 };
 
 use reqwest::Client as ReqwestClient;
-use serde::de::DeserializeOwned;
 use std::fmt::Display;
 use url::Url;
 
@@ -55,7 +54,7 @@ impl SanityClient {
                 Some(host) => host.to_string(),
                 None => "api.sanity.io".to_string(),
             })
-                .use_cdn(config.use_cdn)
+            .use_cdn(config.use_cdn)
             .project_id(&config.project_id)
             .dataset(&config.dataset)
             .build()
@@ -72,7 +71,7 @@ impl SanityClient {
     /// Set the body of the request
     ///
     /// builder method for setting query body for later usecases.
-    fn _body(&mut self, body: &str) -> &mut Self {
+    pub fn body(&mut self, body: &str) -> &mut Self {
         self.payload.set_body(body);
         self
     }
