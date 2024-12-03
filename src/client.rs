@@ -1,18 +1,34 @@
+#![allow(dead_code)]
 use crate::config::SanityConfig;
-use crate::error::RequestError;
-use crate::url::SanityURL;
+use crate::{
+    error::{RequestError, URLError},
+    url::SanityURL,
+};
 
 use reqwest::Client as ReqwestClient;
 use serde::de::DeserializeOwned;
 use std::fmt::Display;
+use url::Url;
 
-/// Request Payload for temporary storing query and request body
-#[derive(Default)]
 #[allow(dead_code)]
 pub struct RequestPayload {
-    pub query: Option<String>,
+    /// Root url without the query body
+    pub query: Url,
+    /// Groq body
     pub body: Option<String>,
-    pub result: Option<String>,
+    pub query_result: Option<String>,
+}
+
+impl Default for RequestPayload {
+    fn default() -> Self {
+        Self {
+            query: Url::parse("https://api.sanity.io")
+                .map_err(URLError::InvalidURL)
+                .unwrap(),
+            body: None,
+            query_result: None,
+        }
+    }
 }
 
 impl RequestPayload {
@@ -33,73 +49,49 @@ impl SanityClient {
     /// Create a new instance for the SanityClient
     ///
     /// Initialize a client instance based on Configuration
-    ///
-    /// ## Example
-    ///
-    /// ```
-    /// let sanity_project_id = abc123
-    /// let sanity_dataset = development
-    /// let config = SanityConfig::new(sanity_project_id, sanity_dataset);
-    /// ```
-    pub fn new(config: SanityConfig) -> Self {
-        Self {
+    pub fn new(config: SanityConfig) -> Result<Self, RequestError> {
+        let url = SanityURL::new()
+            .project_id(&config.project_id)
+            .dataset(&config.dataset)
+            .build()
+            .map_err(RequestError::URLParsingError)?;
+        let mut client = Self {
             config,
             client: ReqwestClient::new(),
             payload: RequestPayload::default(),
-        }
+        };
+        client.payload.query = url;
+        Ok(client)
     }
 
     /// Set the body of the request
-    /// 
+    ///
     /// builder method for setting query body for later usecases.
-    ///
-    /// ## Example
-    ///
-    /// ```
-    /// let body = r#"
-    ///  {
-    ///    _id,
-    ///    _createdAt,
-    ///    _title,
-    ///  }
-    /// "#;
-    ///
-    /// client.get_by_id().body(body).send().await;
-    /// ```
-    fn body(&mut self, body: &str) -> &mut Self {
+    fn _body(&mut self, body: &str) -> &mut Self {
         self.payload.set_body(body);
         self
     }
 
     /// Send a query to the Sanity API
-    pub async fn query(&mut self, body: &str) -> Result<&mut Self, RequestError> {
-        let url = SanityURL::new()
-            .project_id(&self.config.project_id)
-            .dataset(&self.config.dataset)
-            .query(body)
-            .build()
-            .map_err(RequestError::URLParsingError)?;
-
-        let value = self.client.get(url.as_str()).send().await?;
-        let res = value.text().await?;
-        self.payload.result = Some(res);
-        Ok(self)
+    pub async fn query(&mut self, body: &str)  {
+        let query = &mut self.payload.query;
+        SanityURL::query(query, body);
+        let v = self.client.get(query.as_str()).send();
+        println!("{:?}", v.await);
     }
 
-    /// Get the response as a string
     pub fn string(&self) -> Result<String, RequestError> {
-        self.payload
-            .result
-            .as_ref()
-            .map_or(
-                Err(RequestError::StringParsingError("No response found".to_string())),
-                |res| Ok(res.to_string()),
-            )
+        self.payload.query_result.as_ref().map_or(
+            Err(RequestError::StringParsingError(
+                "No response found".to_string(),
+            )),
+            |res| Ok(res.to_string()),
+        )
     }
 
     /// Parse the JSON response
     pub fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError> {
-        let res = self.payload.result.as_ref().unwrap();
+        let res = self.payload.query_result.as_ref().unwrap();
         let value: T = serde_json::from_str(res).map_err(RequestError::JsonParsingError)?;
         Ok(value)
     }

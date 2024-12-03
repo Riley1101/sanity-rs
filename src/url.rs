@@ -2,7 +2,6 @@
 use std::fmt::Display;
 
 use crate::error::URLError;
-use url::form_urlencoded;
 use url::Url;
 
 #[derive(Debug)]
@@ -51,23 +50,23 @@ impl SanityURL {
         self
     }
 
-    pub fn query(&mut self, query: &str) -> &mut Self {
-        let uri = String::from(query)
-            .replace(" ", "")
-            .trim()
-            .replace("\n", "");
-        let encoded_query = form_urlencoded::byte_serialize(uri.as_bytes()).collect::<String>();
-        self.query = encoded_query;
-        self
-    }
-
     pub fn build(&mut self) -> Result<Url, URLError> {
         let url = Url::parse(&format!(
-            "https://{}.{}/{}/data/query/{}?query={}",
-            self.project_id, self.host, self.api_version, self.dataset, self.query
+            "https://{}.{}/{}/data/query/{}",
+            self.project_id, self.host, self.api_version, self.dataset,
         ))
         .map_err(URLError::InvalidURL)?;
         Ok(url)
+    }
+
+    pub fn query(url: &mut Url, query: &str) {
+        let trimmed = query.split_whitespace().collect::<String>();
+        if trimmed.is_empty() {
+            url.set_query(None);
+            return;
+        }
+        let query = format!("query={}", trimmed);
+        url.set_query(Some(&query));
     }
 }
 
@@ -76,23 +75,23 @@ mod test {
     use super::*;
 
     #[test]
-    fn parse_simple() {
+    fn parse_base() {
         let sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"production".to_string())
             .api_version(&"v2022-03-07".to_string())
             .host("api.sanity.io".to_string())
-            .query("")
             .build()
             .unwrap();
+
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query="
+            "https://abc123.api.sanity.io/v2022-03-07/data/query/production"
         );
     }
 
     #[test]
-    fn query_test_one() {
+    fn query_test_one() -> Result<(), URLError> {
         let query = r#"
         *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
             _id,
@@ -100,92 +99,93 @@ mod test {
             _createdAt,
             _updatedAt
         }"#;
-        let sanity_url = SanityURL::new()
+        let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"production".to_string())
             .api_version(&"v2022-03-07".to_string())
             .host("api.sanity.io".to_string())
-            .query(query)
-            .build()
-            .unwrap();
+            .build()?;
+        SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query=*%5B_id%3D%3D%2209139a58-311b-4779-8fa4-723f19242a8e%22%5D%7B_id%2C_type%2C_createdAt%2C_updatedAt%7D"
+            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query=*[_id==%2209139a58-311b-4779-8fa4-723f19242a8e%22]{_id,_type,_createdAt,_updatedAt}"
         );
+        Ok(())
     }
 
     #[test]
-    fn query_with_filter() {
+    fn query_with_filter() -> Result<(), URLError> {
         let query = r#"
         *[type == "post" && published == true]{
             title,
             author,
             categories[]->title
         }"#;
-        let sanity_url = SanityURL::new()
+        let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"blog".to_string())
             .api_version(&"v2023-01-01".to_string())
             .host("api.sanity.io".to_string())
-            .query(query)
-            .build()
-            .unwrap();
+            .build()?;
+        SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2023-01-01/data/query/blog?query=*%5Btype%3D%3D%22post%22%26%26published%3D%3Dtrue%5D%7Btitle%2Cauthor%2Ccategories%5B%5D-%3Etitle%7D"
+            "https://abc123.api.sanity.io/v2023-01-01/data/query/blog?query=*[type==%22post%22&&published==true]{title,author,categories[]-%3Etitle}"
         );
+        Ok(())
     }
 
     #[test]
-    fn empty_query() {
-        let sanity_url = SanityURL::new()
+    fn empty_query() -> Result<(), URLError> {
+        let mut sanity_url = SanityURL::new()
             .project_id(&"xyz456".to_string())
             .dataset(&"test".to_string())
             .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
-            .query("")
-            .build()
-            .unwrap();
+            .build()?;
+        SanityURL::query(&mut sanity_url, "");
         assert_eq!(
             sanity_url.as_str(),
-            "https://xyz456.api.sanity.io/v2023-05-01/data/query/test?query="
+            "https://xyz456.api.sanity.io/v2023-05-01/data/query/test"
         );
+        Ok(())
     }
 
     #[test]
-    fn query_with_special_characters() {
+    fn query_with_special_characters() -> Result<(), URLError> {
         let query = r#"
         *[name == "O'Reilly" && price < 100.0]{
             name,
             price
         }"#;
-        let sanity_url = SanityURL::new()
+        let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"store".to_string())
             .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
-            .query(query)
-            .build()
-            .unwrap();
+            .build()?;
+        SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2023-05-01/data/query/store?query=*%5Bname%3D%3D%22O%27Reilly%22%26%26price%3C100.0%5D%7Bname%2Cprice%7D"
+             "https://abc123.api.sanity.io/v2023-05-01/data/query/store?query=*[name==%22O%27Reilly%22&&price%3C100.0]{name,price}",
         );
+        Ok(())
     }
+
     #[test]
-    fn one_line_query() {
+    fn one_line_query() -> Result<(), URLError> {
         let query = r#"*[_type == "post"]{title, author}"#;
-        let sanity_url = SanityURL::new()
+        let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"blog".to_string())
             .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
-            .query(query)
-            .build()
-            .unwrap();
+            .build()?;
+        SanityURL::query(&mut sanity_url, query);
         assert_eq!(
-        sanity_url.as_str(),
-        "https://abc123.api.sanity.io/v2023-05-01/data/query/blog?query=*%5B_type%3D%3D%22post%22%5D%7Btitle%2Cauthor%7D"
-    );
+            sanity_url.as_str(),
+            "https://abc123.api.sanity.io/v2023-05-01/data/query/blog?query=*[_type==%22post%22]{title,author}"
+        );
+        Ok(())
     }
 }

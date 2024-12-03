@@ -10,6 +10,7 @@ This project is to easily query and parse documents from sanity.io and use it in
   - [ ] put automatic serialization under features
   - [ ] put blocking runtime under features
   - [ ] put async runtime under features
+  - [ ] stop using strings for url
 - [🟢] Query
 - [🚧] ORM
 - [🔴] Actions
