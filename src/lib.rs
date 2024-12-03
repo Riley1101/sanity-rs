@@ -20,6 +20,7 @@ mod tests {
     use error::ConfigurationError;
     use serde::{Deserialize, Serialize};
     use std::time::Duration;
+    use crate::error::RequestError;
 
     use super::*;
 
@@ -55,7 +56,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn get_by_query() {
+    async fn get_by_query() -> Result<(), RequestError> {
         dotenv().ok();
         let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
             .map_err(|_| ConfigurationError::MissingProjectID)
@@ -72,10 +73,12 @@ mod tests {
            _createdAt
          }
         "#;
-        let value = client.query(query).await;
-        //assert_eq!(
-        //    value.unwrap().result[0]._id,
-        //    "09139a58-311b-4779-8fa4-723f19242a8e"
-        //);
+        let value = client.query(query).await?.json::<QueryResult>();
+        println!("{:?}", value);
+        assert_eq!(
+            value.unwrap().result[0]._id,
+            "09139a58-311b-4779-8fa4-723f19242a8e"
+        );
+        Ok(())
     }
 }

@@ -5,7 +5,7 @@ use crate::{
     url::SanityURL,
 };
 
-use reqwest::Client as ReqwestClient;
+use reqwest::Client  as ReqwestClient;
 use serde::de::DeserializeOwned;
 use std::fmt::Display;
 use url::Url;
@@ -73,20 +73,13 @@ impl SanityClient {
     }
 
     /// Send a query to the Sanity API
-    pub async fn query(&mut self, body: &str)  {
+    pub async fn query(&mut self, body: &str)  -> Result<&mut Self, RequestError> {
         let query = &mut self.payload.query;
         SanityURL::query(query, body);
         let v = self.client.get(query.as_str()).send();
-        println!("{:?}", v.await);
-    }
-
-    pub fn string(&self) -> Result<String, RequestError> {
-        self.payload.query_result.as_ref().map_or(
-            Err(RequestError::StringParsingError(
-                "No response found".to_string(),
-            )),
-            |res| Ok(res.to_string()),
-        )
+        let v = v.await?.text().await?;
+        self.payload.query_result = Some(v);
+        Ok(self)
     }
 
     /// Parse the JSON response
