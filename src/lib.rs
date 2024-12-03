@@ -74,9 +74,8 @@ mod tests {
          }
         "#;
         let value = client.query(query).await?.json::<QueryResult>();
-        println!("{:?}", value);
         assert_eq!(
-            value.unwrap().result[0]._id,
+            value?.result[0]._id,
             "09139a58-311b-4779-8fa4-723f19242a8e"
         );
         Ok(())

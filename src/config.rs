@@ -30,7 +30,7 @@ impl SanityConfig {
         Self {
             project_id,
             dataset,
-            use_cdn: false,
+            use_cdn: true,
             token: None,
             perspective: ClientPerspective::Raw,
             api_host: None,

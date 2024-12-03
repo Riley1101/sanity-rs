@@ -45,6 +45,15 @@ impl SanityURL {
         self
     }
 
+    pub fn use_cdn(&mut self, use_cdn: bool) -> &mut Self {
+        self.host = if use_cdn {
+            "apicdn.sanity.io".to_string()
+        } else {
+            "api.sanity.io".to_string()
+        };
+        self
+    }
+
     pub fn dataset(&mut self, dataset: &String) -> &mut Self {
         self.dataset = dataset.to_string();
         self

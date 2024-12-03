@@ -5,7 +5,7 @@ use crate::{
     url::SanityURL,
 };
 
-use reqwest::Client  as ReqwestClient;
+use reqwest::Client as ReqwestClient;
 use serde::de::DeserializeOwned;
 use std::fmt::Display;
 use url::Url;
@@ -51,6 +51,11 @@ impl SanityClient {
     /// Initialize a client instance based on Configuration
     pub fn new(config: SanityConfig) -> Result<Self, RequestError> {
         let url = SanityURL::new()
+            .host(match &config.api_host {
+                Some(host) => host.to_string(),
+                None => "api.sanity.io".to_string(),
+            })
+            .use_cdn(config.use_cdn)
             .project_id(&config.project_id)
             .dataset(&config.dataset)
             .build()
@@ -73,7 +78,7 @@ impl SanityClient {
     }
 
     /// Send a query to the Sanity API
-    pub async fn query(&mut self, body: &str)  -> Result<&mut Self, RequestError> {
+    pub async fn query(&mut self, body: &str) -> Result<&mut Self, RequestError> {
         let query = &mut self.payload.query;
         SanityURL::query(query, body);
         let v = self.client.get(query.as_str()).send();
