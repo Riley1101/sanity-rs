@@ -13,7 +13,7 @@ pub trait ORM {
 
 impl ORM for SanityClient {
     fn get_by_id(&mut self, id: &str) -> &mut SanityClient {
-        let string = format!("*[_id == '{}']", id);
+        let string = format!("*[_id == '{}'][0]", id);
         let query = &mut self.payload.query;
         SanityURL::query(query, string.as_str());
         self
@@ -87,7 +87,7 @@ mod tests {
             .body("{_id,_createdAt}")
             .send()
             .await;
-        println!("{:?}", v.unwrap().json::<QueryResult>().unwrap());
+        assert!(v.is_ok());
         Ok(())
     }
 }
