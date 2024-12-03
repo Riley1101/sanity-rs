@@ -1,14 +1,14 @@
 use serde::de::DeserializeOwned;
 
-use std::future::Future;
 use crate::client::SanityClient;
 use crate::error::RequestError;
 use crate::url::SanityURL;
+use std::future::Future;
 
 pub trait ORM {
     fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError>;
     fn get_by_id(&mut self, id: &str) -> &mut SanityClient;
-    fn query(&mut self) -> impl Future<Output = ()>;
+    fn send(&mut self) -> impl Future<Output = Result<&mut Self, RequestError>>;
 }
 
 impl ORM for SanityClient {
@@ -26,14 +26,19 @@ impl ORM for SanityClient {
         Ok(value)
     }
 
-    async fn query(&mut self) {
-        println!("Querying...");
+    async fn send(&mut self) -> Result<&mut Self, RequestError> {
+        let query = &mut self.payload.query;
+        let body = &self.payload.body;
+        let url = format!("{}{}", query.as_str(), body.as_ref().unwrap());
+        let v = self.client.get(url.as_str()).send();
+        let v = v.await?.text().await?;
+        self.payload.query_result = Some(v);
+        Ok(self)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::config::SanityConfig;
     use crate::create_client;
     use crate::error::ConfigurationError;
@@ -77,7 +82,12 @@ mod tests {
         let config = SanityConfig::new(sanity_project_id, sanity_dataset);
 
         let mut client = create_client(config);
-        let _ = client.get_by_id("09139a58-311b-4779-8fa4-723f19242a8e").query().await;
+        let v = client
+            .get_by_id("09139a58-311b-4779-8fa4-723f19242a8e")
+            .body("{_id,_createdAt}")
+            .send()
+            .await;
+        println!("{:?}", v.unwrap().json::<QueryResult>().unwrap());
         Ok(())
     }
 }

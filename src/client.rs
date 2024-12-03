@@ -40,7 +40,7 @@ impl RequestPayload {
 #[allow(dead_code)]
 pub struct SanityClient {
     config: SanityConfig,
-    client: ReqwestClient,
+    pub client: ReqwestClient,
     pub payload: RequestPayload,
 }
 
