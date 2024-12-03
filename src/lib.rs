@@ -4,6 +4,7 @@ pub mod error;
 pub mod orm;
 mod url;
 
+use orm::ORM;
 use client::SanityClient;
 use config::SanityConfig;
 

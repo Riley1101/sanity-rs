@@ -42,7 +42,7 @@ impl RequestPayload {
 pub struct SanityClient {
     config: SanityConfig,
     client: ReqwestClient,
-    payload: RequestPayload,
+    pub payload: RequestPayload,
 }
 
 impl SanityClient {
@@ -55,7 +55,7 @@ impl SanityClient {
                 Some(host) => host.to_string(),
                 None => "api.sanity.io".to_string(),
             })
-            .use_cdn(config.use_cdn)
+                .use_cdn(config.use_cdn)
             .project_id(&config.project_id)
             .dataset(&config.dataset)
             .build()
@@ -85,13 +85,6 @@ impl SanityClient {
         let v = v.await?.text().await?;
         self.payload.query_result = Some(v);
         Ok(self)
-    }
-
-    /// Parse the JSON response
-    pub fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError> {
-        let res = self.payload.query_result.as_ref().unwrap();
-        let value: T = serde_json::from_str(res).map_err(RequestError::JsonParsingError)?;
-        Ok(value)
     }
 }
 
