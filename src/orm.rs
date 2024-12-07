@@ -8,12 +8,20 @@ use std::future::Future;
 pub trait ORM {
     fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError>;
     fn get_by_id(&mut self, id: &str) -> &mut SanityClient;
+    fn get_by_ids(&mut self, ids: &[&str]) -> &mut SanityClient;
     fn send(&mut self) -> impl Future<Output = Result<&mut Self, RequestError>>;
 }
 
 impl ORM for SanityClient {
     fn get_by_id(&mut self, id: &str) -> &mut SanityClient {
         let string = format!("*[_id == '{}'][0]", id);
+        let query = &mut self.payload.query;
+        SanityURL::query(query, string.as_str());
+        self
+    }
+
+    fn get_by_ids(&mut self, ids: &[&str]) -> &mut SanityClient {
+        let string = format!(r#"*[_id in ["{}"]]"#, ids.join("\",\""));
         let query = &mut self.payload.query;
         SanityURL::query(query, string.as_str());
         self
@@ -70,6 +78,7 @@ mod tests {
         ms: usize,
     }
 
+    #[ignore]
     #[tokio::test]
     async fn get_by_id() -> Result<(), RequestError> {
         dotenv().ok();
@@ -88,6 +97,32 @@ mod tests {
             .send()
             .await;
         assert!(v.is_ok());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn get_by_ids() -> Result<(), RequestError> {
+        dotenv().ok();
+        let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+            .map_err(|_| ConfigurationError::MissingProjectID)
+            .expect("Missing project ID");
+        let sanity_dataset = std::env::var("SANITY_DATASET")
+            .map_err(|_| ConfigurationError::MissingDataset)
+            .expect("Missing dataset");
+        let config = SanityConfig::new(sanity_project_id, sanity_dataset);
+
+        let mut client = create_client(config);
+        let ids = vec![
+            "09139a58-311b-4779-8fa4-723f19242a8e",
+            "ad79d8a3-35a9-4ac6-ab5b-cc0c62288b37",
+        ];
+        let v = client
+            .get_by_ids(&ids)
+            .body("")
+            .send()
+            .await?;
+        println!("{:?}", v.payload.query_result);
+           
         Ok(())
     }
 }
