@@ -69,6 +69,7 @@ impl SanityURL {
     }
 
     pub fn query(url: &mut Url, query: &str) {
+        // TODO! do not clear the parameter for multiple queries
         let trimmed = query.split_whitespace().collect::<String>();
         if trimmed.is_empty() {
             url.set_query(None);
