@@ -78,7 +78,6 @@ mod tests {
         ms: usize,
     }
 
-    #[ignore]
     #[tokio::test]
     async fn get_by_id() -> Result<(), RequestError> {
         dotenv().ok();
@@ -121,7 +120,8 @@ mod tests {
             .body("")
             .send()
             .await?;
-           
+        let v = v.json::<QueryResult>();
+        assert!(v.is_ok());
         Ok(())
     }
 }
