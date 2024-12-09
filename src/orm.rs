@@ -121,7 +121,6 @@ mod tests {
             .body("")
             .send()
             .await?;
-        println!("{:?}", v.payload.query_result);
            
         Ok(())
     }

@@ -4,6 +4,11 @@ use std::fmt::Display;
 use crate::error::URLError;
 use url::Url;
 
+pub struct Query {
+    condition: String,
+    body: String,
+}
+
 #[derive(Debug)]
 pub struct SanityURL {
     project_id: String,
@@ -69,14 +74,26 @@ impl SanityURL {
     }
 
     pub fn query(url: &mut Url, query: &str) {
-        // TODO! do not clear the parameter for multiple queries
-        let trimmed = query.split_whitespace().collect::<String>();
-        if trimmed.is_empty() {
+        if query.is_empty() || query.len() < 3 {
             url.set_query(None);
             return;
         }
-        let query = format!("query={}", trimmed);
-        url.set_query(Some(&query));
+        let cond_start = query.find("*[").unwrap_or(0) + 2;
+        let cond_end = query.find("]").unwrap_or(0);
+        let condition = query[cond_start..cond_end].to_string();
+        let mut body = query[cond_end + 1..]
+            .to_string()
+            .split_whitespace()
+            .collect::<String>();
+        if condition.is_empty() {
+            url.set_query(None);
+            return;
+        }
+        if body.is_empty() {
+            body = "".to_string();
+        }
+        let query = format!("*[{}]{}", condition, body);
+        url.set_query(Some(&format!("query={}", query)));
     }
 }
 
@@ -118,7 +135,7 @@ mod test {
         SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query=*[_id==%2209139a58-311b-4779-8fa4-723f19242a8e%22]{_id,_type,_createdAt,_updatedAt}"
+            "https://abc123.api.sanity.io/v2022-03-07/data/query/production?query=*[_id%20==%20%2209139a58-311b-4779-8fa4-723f19242a8e%22]{_id,_type,_createdAt,_updatedAt}"
         );
         Ok(())
     }
@@ -140,7 +157,7 @@ mod test {
         SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2023-01-01/data/query/blog?query=*[type==%22post%22&&published==true]{title,author,categories[]-%3Etitle}"
+                "https://abc123.api.sanity.io/v2023-01-01/data/query/blog?query=*[type%20==%20%22post%22%20&&%20published%20==%20true]{title,author,categories[]-%3Etitle}"
         );
         Ok(())
     }
@@ -177,7 +194,7 @@ mod test {
         SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-             "https://abc123.api.sanity.io/v2023-05-01/data/query/store?query=*[name==%22O%27Reilly%22&&price%3C100.0]{name,price}",
+             "https://abc123.api.sanity.io/v2023-05-01/data/query/store?query=*[name%20==%20%22O%27Reilly%22%20&&%20price%20%3C%20100.0]{name,price}",
         );
         Ok(())
     }
@@ -194,7 +211,7 @@ mod test {
         SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2023-05-01/data/query/blog?query=*[_type==%22post%22]{title,author}"
+            "https://abc123.api.sanity.io/v2023-05-01/data/query/blog?query=*[_type%20==%20%22post%22]{title,author}"
         );
         Ok(())
     }
