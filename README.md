@@ -7,12 +7,11 @@ This project is to easily query and parse documents from sanity.io and use it in
 ## Features and todo
 
 - [🟢] Base
-  - [ ] put automatic serialization under features
-  - [ ] put blocking runtime under features
-  - [ ] put async runtime under features
-  - [ ] stop using strings for url
-- [🟢] Query
+  - [x] Raw string query
+  - [x] support String raw response
+  - [x] serde integration with generics
 - [🚧] ORM
+  - [x] ORM trait
 - [🔴] Actions
 - [🔴] Subscribe
 
@@ -74,6 +73,30 @@ mod test {
         let value: Result<QueryResult, RequestError> = client.query(query).await.unwrap().json();
         assert!(value.is_ok());
     }
-}
 
+    #[tokio::test]
+    async fn orm_get_by_ids() -> Result<(), RequestError> {
+        dotenv().ok();
+        let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+            .map_err(|_| ConfigurationError::MissingProjectID)
+            .expect("Missing project ID");
+        let sanity_dataset = std::env::var("SANITY_DATASET")
+            .map_err(|_| ConfigurationError::MissingDataset)
+            .expect("Missing dataset");
+        let config: SanityConfig = SanityConfig::new(sanity_project_id, sanity_dataset);
+        let mut client = create_client(config);
+
+        let v = client
+            .get_by_ids(&[
+                "09139a58-311b-4779-8fa4-723f19242a8e",
+                "09139a58-311b-4779-8fa4-723f19242a8e",
+            ])
+            .body("{_id,_createdAt}")
+            .send()
+            .await?
+            .json::<QueryResult<Vec<Record>>>();
+        assert!(v.is_ok());
+        Ok(())
+    }
+}
 ```

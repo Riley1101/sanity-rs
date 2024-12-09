@@ -3,6 +3,7 @@ use sanity_rs::create_client;
 use sanity_rs::error::{ConfigurationError, RequestError};
 use sanity_rs::orm::ORM;
 use serde::{Deserialize, Serialize};
+use dotenv::dotenv;
 
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,6 +23,7 @@ struct Record {
 
 #[tokio::main]
 async fn main() -> Result<(), RequestError> {
+    dotenv().ok();
     let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
         .map_err(|_| ConfigurationError::MissingProjectID)
         .expect("Missing project ID");
@@ -30,6 +32,7 @@ async fn main() -> Result<(), RequestError> {
         .expect("Missing dataset");
     let config = SanityConfig::new(sanity_project_id, sanity_dataset);
     let mut client = create_client(config);
+    println!("Client created {}", client);
     let query = r#"
          *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
            _id,

@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use crate::config::SanityConfig;
 use crate::{
     error::{RequestError, URLError},
@@ -46,7 +45,6 @@ pub struct SanityClient {
 
 impl SanityClient {
     /// Create a new instance for the SanityClient
-    ///
     /// Initialize a client instance based on Configuration
     pub fn new(config: SanityConfig) -> Result<Self, RequestError> {
         let url = SanityURL::new()
@@ -89,6 +87,6 @@ impl SanityClient {
 
 impl Display for SanityClient {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str("SanityClient")
+        f.write_str(&format!("SanityClient : {:?}", self.config.project_id))
     }
 }
