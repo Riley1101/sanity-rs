@@ -1,4 +1,5 @@
 mod client;
+pub mod portabletext;
 pub mod config;
 pub mod error;
 pub mod orm;
