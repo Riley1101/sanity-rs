@@ -7,4 +7,5 @@ edition = "2021"
 dotenv = "0.15.0"
 leptos = { version = "0.7.0", features = ["csr"] }
 serde = { version = "1.0.215", features = ["derive"] }
-sanity-rs = { git = "https://github.com/Riley1101/sanity-rs", branch = "main", version = "0.1.0" }
+sanity-rs = { path = "../../" }
+codee = "0.2.0"

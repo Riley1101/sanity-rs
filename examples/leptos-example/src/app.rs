@@ -13,14 +13,27 @@ struct QueryResult<T> {
     ms: u64,
 }
 
+impl<T> QueryResult<T> {
+    fn new(query: String, result: T, sync_tags: Vec<String>, ms: u64) -> Self {
+        Self {
+            query,
+            result,
+            syncTags: sync_tags,
+            ms,
+        }
+    }
+}
+
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
-struct Record {
+struct Article {
     _id: String,
     _createdAt: String,
 }
 
-async fn load_data() -> Result<QueryResult<Vec<Record>>, RequestError> {
+type ArticleList = QueryResult<Vec<Article>>;
+
+async fn load_data() -> Vec<Article> {
     let sanity_project_id = "m9whymrq".to_string();
     let sanity_dataset = "production".to_string();
     let config = SanityConfig::new(sanity_project_id, sanity_dataset);
@@ -33,12 +46,19 @@ async fn load_data() -> Result<QueryResult<Vec<Record>>, RequestError> {
         }
     "#;
 
-    let response = client.query(query).await?;
-    response.json::<QueryResult<Vec<Record>>>()
+    let response = client.query(query).await.unwrap();
+    let response = response.json::<ArticleList>();
+    match response {
+        Ok(result) => result.result,
+        Err(e) => {
+            panic!("Error: {:?}", e);
+        }
+    }
 }
 
 #[component]
 pub fn App() -> impl IntoView {
+    let async_data = OnceResource::new(load_data());
 
     view! {
         <div>

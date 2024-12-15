@@ -941,6 +941,7 @@ dependencies = [
 name = "leptos-example"
 version = "0.1.0"
 dependencies = [
+ "codee",
  "dotenv",
  "leptos",
  "sanity-rs",
@@ -1700,7 +1701,6 @@ dependencies = [
 [[package]]
 name = "sanity-rs"
 version = "0.1.0"
-source = "git+https://github.com/Riley1101/sanity-rs?branch=main#11bbf47324bf77cb135b0eb61b8d45b74eac5a75"
 dependencies = [
  "reqwest",
  "serde",
