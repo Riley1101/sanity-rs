@@ -29,7 +29,40 @@ impl Default for Tag {
         Self::new(Style::Normal)
     }
 }
+pub fn html(node: Node) -> String {
+    let mut result = String::new();
+    let mut stack = vec![node]; // Stack to manage nodes
 
+    while let Some(current_node) = stack.pop() {
+        match current_node.style {
+            Style::H1 => {
+                result.push_str("<h1>");
+                match current_node._type {
+                    Block::Text(text) => result.push_str(&text),
+                    Block::Block(blocks) => {
+                        // Add closing tag for this node to the result later
+                        result.push_str("</h1>");
+                        // Push children in reverse order to process them correctly
+                        for block in blocks.into_iter().rev() {
+                            stack.push(*block);
+                        }
+                        continue; // Skip appending the closing tag immediately
+                    }
+                }
+                result.push_str("</h1>");
+            }
+            Style::H2 => todo!(),
+            Style::H3 => todo!(),
+            Style::H4 => todo!(),
+            Style::H5 => todo!(),
+            Style::H6 => todo!(),
+            Style::Normal => todo!(),
+            Style::Blockquote => todo!(),
+        }
+    }
+
+    result
+}
 pub fn default_html_renderer(node: Node) -> String {
     let mut result = String::new();
     match node.style {
@@ -90,12 +123,42 @@ impl PortableTextRenderer {
     }
 
     fn render(&mut self) -> String {
-        let style = mem::replace(&mut self.content.style, Style::Normal);
-        if let Some(callback) = self.config.get(&style) {
-            callback(&self.content)
-        } else {
-            String::new()
+        let mut result = String::new();
+        let content = mem::replace(
+            &mut self.content,
+            Node {
+                style: Style::Normal,
+                _type: Block::Text("".to_string()),
+                mark_defs: None,
+            },
+        );
+        let mut stack = vec![content];
+        while let Some(current_node) = stack.pop() {
+            match current_node.style {
+                Style::H1 => {
+                    result.push_str("<h1>");
+                    match current_node._type {
+                        Block::Text(text) => result.push_str(&text),
+                        Block::Block(blocks) => {
+                            result.push_str("</h1>");
+                            for block in blocks.into_iter().rev() {
+                                stack.push(*block);
+                            }
+                            continue; // Skip appending the closing tag immediately
+                        }
+                    }
+                    result.push_str("</h1>");
+                }
+                Style::H2 => todo!(),
+                Style::H3 => todo!(),
+                Style::H4 => todo!(),
+                Style::H5 => todo!(),
+                Style::H6 => todo!(),
+                Style::Normal => todo!(),
+                Style::Blockquote => todo!(),
+            }
         }
+        result
     }
 }
 
