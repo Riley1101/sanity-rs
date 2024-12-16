@@ -13,7 +13,7 @@ This project is to easily query and parse documents from sanity.io and use it in
 - [🚧] ORM
   - [x] ORM trait
 - [🚧] Portable Text Renderer
-  - [x] Base sanity portable text 
+  - [x] Base sanity portable text
 - [🔴] Actions
 - [🔴] Subscribe
 
