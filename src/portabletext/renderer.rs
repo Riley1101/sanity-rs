@@ -90,42 +90,12 @@ impl PortableTextRenderer {
     }
 
     fn render(&mut self) -> String {
-        let mut result = String::new();
-        match mem::replace(&mut self.content.style, Style::Normal) {
-            Style::H1 => {
-                let h1_callback = self.config.get(&Style::H1).unwrap();
-                result.push_str(&h1_callback(&self.content));
-            }
-            Style::H2 => {
-                let h2_callback = self.config.get(&Style::H2).unwrap();
-                result.push_str(&h2_callback(&self.content));
-            }
-            Style::H3 => {
-                let h3_callback = self.config.get(&Style::H3).unwrap();
-                result.push_str(&h3_callback(&self.content));
-            }
-            Style::H4 => {
-                let h4_callback = self.config.get(&Style::H4).unwrap();
-                result.push_str(&h4_callback(&self.content));
-            }
-            Style::H5 => {
-                let h5_callback = self.config.get(&Style::H5).unwrap();
-                result.push_str(&h5_callback(&self.content));
-            }
-            Style::H6 => {
-                let h6_callback = self.config.get(&Style::H6).unwrap();
-                result.push_str(&h6_callback(&self.content));
-            }
-            Style::Normal => {
-                let normal_callback = self.config.get(&Style::Normal).unwrap();
-                result.push_str(&normal_callback(&self.content));
-            }
-            Style::Blockquote => {
-                let blockquote_callback = self.config.get(&Style::Blockquote).unwrap();
-                result.push_str(&blockquote_callback(&self.content));
-            }
+        let style = mem::replace(&mut self.content.style, Style::Normal);
+        if let Some(callback) = self.config.get(&style) {
+            callback(&self.content)
+        } else {
+            String::new()
         }
-        result
     }
 }
 
