@@ -12,6 +12,8 @@ This project is to easily query and parse documents from sanity.io and use it in
   - [x] serde integration with generics
 - [🚧] ORM
   - [x] ORM trait
+- [🚧] Portable Text Renderer
+  - [x] Base sanity portable text
 - [🔴] Actions
 - [🔴] Subscribe
 
