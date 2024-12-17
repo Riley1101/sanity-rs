@@ -1,59 +1,77 @@
 #![allow(dead_code)]
-use std::cmp::Eq;
-use std::hash::Hash;
+use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub enum Block {
+    Span,
+    Block,
+}
+
+#[derive(Debug)]
 pub enum Style {
     H1,
     H2,
     H3,
     H4,
     H5,
-    H6,
     Normal,
     Blockquote,
 }
 
-pub enum Block {
-    Text(String),
-    Block(Vec<Box<Node>>),
+pub enum Children {
+    Text(TextNode),
+    Node(Node),
 }
 
+#[allow(non_snake_case)]
 pub struct Node {
-    pub style: Style,
+    pub _key: String,
     pub _type: Block,
-    pub mark_defs: Option<String>,
+    pub children: Vec<Children>,
+    pub markDefs: Vec<MarkDef>,
+    pub style: Style,
+}
+
+pub struct MarkDef(HashMap<String, String>);
+
+pub struct TextNode {
+    pub _key: String,
+    pub _type: String,
+    pub text: String,
+    pub marks: Vec<String>,
 }
 
 #[cfg(test)]
 mod test {
-    use crate::portabletext::renderer::default_html_renderer;
-
     use super::*;
 
     #[test]
     fn portabletest() {
-        let child = Node {
-            style: Style::H1,
-            _type: Block::Text("Emoji".to_string()),
-            mark_defs: None,
+        let text = TextNode {
+            _key: "key".to_string(),
+            _type: "text".to_string(),
+            marks: vec![],
+            text: "Hello World".to_string(),
+        };
+        let text2 = TextNode {
+            _key: "key".to_string(),
+            _type: "text".to_string(),
+            marks: vec![],
+            text: "Hello World".to_string(),
         };
 
-        let child2 = Node {
-            style: Style::H1,
-            _type: Block::Text("🚀".to_string()),
-            mark_defs: None,
+        let h2 = Node {
+            _key: "key".to_string(),
+            style: Style::H2,
+            _type: Block::Block,
+            children: vec![Children::Text(text)],
+            markDefs: vec![],
         };
-
-        let heading = Node {
+        let h1 = Node {
+            _key: "key".to_string(),
             style: Style::H1,
-            _type: Block::Block(vec![Box::new(child), Box::new(child2)]),
-            mark_defs: None,
+            _type: Block::Block,
+            children: vec![Children::Text(text2), Children::Node(h2)],
+            markDefs: vec![],
         };
-
-        assert_eq!(
-            "<h1><h1>Emoji</h1><h1>🚀</h1></h1>",
-            default_html_renderer(heading)
-        );
     }
 }
