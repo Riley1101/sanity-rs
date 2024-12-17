@@ -1,6 +1,7 @@
 use actix_web::{get, App, HttpResponse, HttpServer, Responder, web};
 use sanity_rs::config::SanityConfig;
 use sanity_rs::client::SanityClient;
+use sanity_rs::portabletext::blocks::Node;
 use sanity_rs::create_client;
 use sanity_rs::orm::ORM;
 use sanity_rs::error::{ConfigurationError, RequestError};
@@ -22,13 +23,15 @@ struct Record {
     _id: String,
     #[serde(rename = "_createdAt")]
     _created_at: String,
+    body: Node,
 }
 #[get("/")]
 async fn hello(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     let query = r#"
          *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
            _id,
-           _createdAt
+           _createdAt,
+           body
          }
         "#;
     let mut client = client.lock().await;
