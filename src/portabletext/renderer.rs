@@ -17,6 +17,11 @@ impl Renderer {
         }
     }
 
+    pub fn add(&mut self, style: Style, callback: Callback) -> &mut Self {
+        self.config.insert(style, callback);
+        self
+    }
+
     pub fn render(&mut self) -> String {
         let mut result = String::from("");
 

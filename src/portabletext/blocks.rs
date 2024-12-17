@@ -78,8 +78,9 @@ mod test {
         };
 
         let body = vec![h1];
-        let mut renderer = Renderer::new(body);
-        let result = renderer.render();
+        let result = Renderer::new(body)
+            .add(Style::H1, |_node| "<h1>Hello world</h1>".to_string())
+            .render();
         println!("{}", result);
     }
 }
