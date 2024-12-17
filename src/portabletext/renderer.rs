@@ -39,7 +39,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn portabletest() {
+    fn render_headings() {
         let text = TextNode {
             _key: "key".to_string(),
             _type: "text".to_string(),
@@ -70,11 +70,53 @@ mod test {
 
         let body = vec![h1];
         let result = Renderer::new(body)
-            .add(Style::H1, |node| {
-                println!("{:?}", node.html());
-                "<h1>Hello world</h1>".to_string()
-            })
+            .add(Style::H1, |node| node.html())
+            .add(Style::Normal, |node| node.html())
             .render();
-        println!("{}", result);
+        assert_eq!("<h1>Hello World</h1><h2>well</h2>", result);
+    }
+
+    #[test]
+    fn render_a_span() {
+        let text = TextNode {
+            _key: "key".to_string(),
+            _type: "text".to_string(),
+            marks: vec![],
+            text: "lorem is cool and i love it".to_string(),
+        };
+
+        let text2 = TextNode {
+            _key: "key".to_string(),
+            _type: "text".to_string(),
+            marks: vec![],
+            text: "this is a quote".to_string(),
+        };
+
+        let blockquote = Node {
+            _key: "key".to_string(),
+            style: Style::Blockquote,
+            _type: Block::Block,
+            children: vec![Children::Text(text2)],
+            markDefs: vec![],
+        };
+
+        let paragraph = Node {
+            _key: "key".to_string(),
+            style: Style::Normal,
+            _type: Block::Block,
+            children: vec![Children::Text(text), Children::Node(blockquote)],
+            markDefs: vec![],
+        };
+
+        let body = vec![paragraph];
+        let result = Renderer::new(body)
+            .add(Style::H1, |node| node.html())
+            .add(Style::Normal, |node| node.html())
+            .add(Style::Blockquote, |node| node.html())
+            .render();
+        assert_eq!(
+            "<p>lorem is cool and i love it</p><blockquote>this is a quote</blockquote>",
+            result
+        );
     }
 }
