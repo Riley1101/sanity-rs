@@ -8,20 +8,20 @@ use serde::{Deserialize, Serialize};
 use futures::lock::Mutex;
 use dotenv::dotenv;
 
-#[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
 struct QueryResult<T> {
     query: String,
     result: T,
-    syncTags: Vec<String>,
+    #[serde(rename = "syncTags")]
+    sync_tags: Vec<String>,
     ms: u64,
 }
 
-#[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
 struct Record {
     _id: String,
-    _createdAt: String,
+    #[serde(rename = "_createdAt")]
+    _created_at: String,
 }
 #[get("/")]
 async fn hello(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
