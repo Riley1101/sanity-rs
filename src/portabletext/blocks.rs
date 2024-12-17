@@ -1,12 +1,15 @@
 #![allow(dead_code)]
+use super::renderer::Renderer;
+use std::cmp::Eq;
 use std::collections::HashMap;
+use std::hash::Hash;
 
 pub enum Block {
     Span,
     Block,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Eq, Hash, PartialEq)]
 pub enum Style {
     H1,
     H2,
@@ -73,5 +76,10 @@ mod test {
             children: vec![Children::Text(text2), Children::Node(h2)],
             markDefs: vec![],
         };
+
+        let body = vec![h1];
+        let mut renderer = Renderer::new(body);
+        let result = renderer.render();
+        println!("{}", result);
     }
 }
