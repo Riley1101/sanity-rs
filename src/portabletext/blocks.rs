@@ -1,7 +1,6 @@
 #![allow(dead_code)]
-use super::renderer::Renderer;
-use std::cmp::Eq;
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::hash::Hash;
 
 pub enum Block {
@@ -34,6 +33,42 @@ pub struct Node {
     pub style: Style,
 }
 
+pub trait Render {
+    fn html(&self) -> String;
+}
+
+impl Render for Node {
+    fn html(&self) -> String {
+        let mut result = String::from("");
+        let tag = match &self.style {
+            Style::H1 => "h1",
+            Style::H2 => "h2",
+            Style::H3 => "h3",
+            Style::H4 => "h4",
+            Style::H5 => "h5",
+            Style::Normal => "p",
+            Style::Blockquote => "blockquote",
+        };
+        for child in &self.children {
+            match child {
+                Children::Text(text) => {
+                    result.push_str(&format!("<{}>{}</{}>", tag, text.text, tag));
+                }
+                Children::Node(node) => {
+                    result.push_str(&node.html());
+                }
+            }
+        }
+        result
+    }
+}
+
+impl Display for Node {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self.style)
+    }
+}
+
 pub struct MarkDef(HashMap<String, String>);
 
 pub struct TextNode {
@@ -41,46 +76,4 @@ pub struct TextNode {
     pub _type: String,
     pub text: String,
     pub marks: Vec<String>,
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn portabletest() {
-        let text = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "Hello World".to_string(),
-        };
-        let text2 = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "Hello World".to_string(),
-        };
-
-        let h2 = Node {
-            _key: "key".to_string(),
-            style: Style::H2,
-            _type: Block::Block,
-            children: vec![Children::Text(text)],
-            markDefs: vec![],
-        };
-        let h1 = Node {
-            _key: "key".to_string(),
-            style: Style::H1,
-            _type: Block::Block,
-            children: vec![Children::Text(text2), Children::Node(h2)],
-            markDefs: vec![],
-        };
-
-        let body = vec![h1];
-        let result = Renderer::new(body)
-            .add(Style::H1, |_node| "<h1>Hello world</h1>".to_string())
-            .render();
-        println!("{}", result);
-    }
 }
