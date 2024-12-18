@@ -89,14 +89,13 @@ mod test {
             style: Style::H2,
             _type: Block::Block,
             children: vec![Children::Text(text)],
-            markDefs: vec![],
         };
+
         let h1 = Node {
             _key: "key".to_string(),
             style: Style::H1,
             _type: Block::Block,
             children: vec![Children::Text(text2), Children::Node(h2)],
-            markDefs: vec![],
         };
 
         let body = vec![h1];
@@ -128,7 +127,6 @@ mod test {
             style: Style::Blockquote,
             _type: Block::Block,
             children: vec![Children::Text(text2)],
-            markDefs: vec![],
         };
 
         let paragraph = Node {
@@ -136,7 +134,6 @@ mod test {
             style: Style::Normal,
             _type: Block::Block,
             children: vec![Children::Text(text)],
-            markDefs: vec![],
         };
 
         let body = vec![paragraph, blockquote];
@@ -168,7 +165,6 @@ mod test {
             style: Style::Blockquote,
             _type: Block::Block,
             children: vec![Children::Text(text2)],
-            markDefs: vec![],
         };
 
         let paragraph = Node {
@@ -176,7 +172,6 @@ mod test {
             style: Style::Normal,
             _type: Block::Block,
             children: vec![Children::Text(text)],
-            markDefs: vec![],
         };
 
         let body = vec![paragraph, blockquote];

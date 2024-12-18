@@ -1,6 +1,5 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
@@ -78,4 +77,26 @@ pub struct TextNode {
     pub _type: String,
     pub text: String,
     pub marks: Vec<String>,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn serialize_text_node() {
+        let text = TextNode {
+            _key: "key".to_string(),
+            _type: "2text".to_string(),
+            marks: vec![],
+            text: "lorem is cool and i love it".to_string(),
+        };
+
+        let serialized = serde_json::to_string(&text).unwrap();
+        let result =
+            r###"{"2_key":"key","_type":"text","text":"lorem is cool and i love it","marks":[]}"###;
+        //assert_eq!(result, serialized);
+
+        let deserialized: TextNode = serde_json::from_str(result).unwrap();
+        println!("{:?}", deserialized);
+    }
 }
