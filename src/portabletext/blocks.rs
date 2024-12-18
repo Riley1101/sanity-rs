@@ -1,14 +1,16 @@
 #![allow(dead_code)]
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Block {
     Span,
     Block,
 }
 
-#[derive(Debug, Eq, Hash, PartialEq)]
+#[derive(Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub enum Style {
     H1,
     H2,
@@ -19,17 +21,18 @@ pub enum Style {
     Blockquote,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Children {
     Text(TextNode),
     Node(Node),
 }
 
 #[allow(non_snake_case)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
     pub _key: String,
     pub _type: Block,
     pub children: Vec<Children>,
-    pub markDefs: Vec<MarkDef>,
     pub style: Style,
 }
 
@@ -69,8 +72,7 @@ impl Display for Node {
     }
 }
 
-pub struct MarkDef(HashMap<String, String>);
-
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TextNode {
     pub _key: String,
     pub _type: String,
