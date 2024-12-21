@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use serde::{Deserialize, Serialize};
+use std::cmp::PartialEq;
 use std::fmt::Display;
 use std::hash::Hash;
 
@@ -79,6 +80,12 @@ pub struct TextNode {
     pub marks: Vec<String>,
 }
 
+impl PartialEq for TextNode {
+    fn eq(&self, other: &Self) -> bool {
+        self._key == other._key && self.text == other.text
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -86,17 +93,17 @@ mod test {
     fn serialize_text_node() {
         let text = TextNode {
             _key: "key".to_string(),
-            _type: "2text".to_string(),
+            _type: "text".to_string(),
             marks: vec![],
             text: "lorem is cool and i love it".to_string(),
         };
 
         let serialized = serde_json::to_string(&text).unwrap();
         let result =
-            r###"{"2_key":"key","_type":"text","text":"lorem is cool and i love it","marks":[]}"###;
-        //assert_eq!(result, serialized);
+            r###"{"_key":"key","_type":"text","text":"lorem is cool and i love it","marks":[]}"###;
+        assert_eq!(result, serialized);
 
         let deserialized: TextNode = serde_json::from_str(result).unwrap();
-        println!("{:?}", deserialized);
+        assert_eq!(text, deserialized);
     }
 }

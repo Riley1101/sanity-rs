@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::blocks::{Block, Children, Node, Render, Style, TextNode};
+use super::blocks::{Children, Node, Render, Style};
 
 type Callback = fn(&Node) -> String;
 
@@ -67,6 +67,8 @@ impl Renderer {
 
 #[cfg(test)]
 mod test {
+    use crate::portabletext::blocks::{Block, TextNode};
+
     use super::*;
 
     #[test]
