@@ -1,0 +1,11 @@
+[package]
+name = "actix-web-static-page"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+sanity-rs = { path = "../../" }
+serde = { version = "1.0.215", features = ["derive"] }
+dotenv = "0.15.0"
+futures = "0.3.31"

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::blocks::{Block, Children, Node, Render, Style, TextNode};
+use super::blocks::{Children, Node, Render, Style};
 
 type Callback = fn(&Node) -> String;
 
@@ -22,10 +22,10 @@ fn default_callback(node: &Node) -> String {
     };
     for child in &node.children {
         match child {
-            Children::Text(text) => {
+            Children::Span(text) => {
                 result.push_str(&format!("<{}>{}</{}>", tag, text.text, tag));
             }
-            Children::Node(node) => {
+            Children::Block(node) => {
                 result.push_str(&node.html());
             }
         }
@@ -67,6 +67,8 @@ impl Renderer {
 
 #[cfg(test)]
 mod test {
+    use crate::portabletext::blocks::TextNode;
+
     use super::*;
 
     #[test]
@@ -87,16 +89,15 @@ mod test {
         let h2 = Node {
             _key: "key".to_string(),
             style: Style::H2,
-            _type: Block::Block,
-            children: vec![Children::Text(text)],
-            markDefs: vec![],
+            _type: "block".to_string(),
+            children: vec![Children::Span(text)],
         };
+
         let h1 = Node {
             _key: "key".to_string(),
             style: Style::H1,
-            _type: Block::Block,
-            children: vec![Children::Text(text2), Children::Node(h2)],
-            markDefs: vec![],
+            _type: "block".to_string(),
+            children: vec![Children::Span(text2), Children::Block(h2)],
         };
 
         let body = vec![h1];
@@ -126,17 +127,15 @@ mod test {
         let blockquote = Node {
             _key: "key".to_string(),
             style: Style::Blockquote,
-            _type: Block::Block,
-            children: vec![Children::Text(text2)],
-            markDefs: vec![],
+            _type: "block".to_string(),
+            children: vec![Children::Span(text2)],
         };
 
         let paragraph = Node {
             _key: "key".to_string(),
             style: Style::Normal,
-            _type: Block::Block,
-            children: vec![Children::Text(text)],
-            markDefs: vec![],
+            _type: "span".to_string(),
+            children: vec![Children::Span(text)],
         };
 
         let body = vec![paragraph, blockquote];
@@ -166,17 +165,15 @@ mod test {
         let blockquote = Node {
             _key: "key".to_string(),
             style: Style::Blockquote,
-            _type: Block::Block,
-            children: vec![Children::Text(text2)],
-            markDefs: vec![],
+            _type: "block".to_string(),
+            children: vec![Children::Span(text2)],
         };
 
         let paragraph = Node {
             _key: "key".to_string(),
             style: Style::Normal,
-            _type: Block::Block,
-            children: vec![Children::Text(text)],
-            markDefs: vec![],
+            _type: "block".to_string(),
+            children: vec![Children::Span(text)],
         };
 
         let body = vec![paragraph, blockquote];
