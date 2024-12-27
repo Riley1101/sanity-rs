@@ -1,37 +1,60 @@
 #![allow(dead_code)]
+use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
 use std::cmp::PartialEq;
 use std::fmt::Display;
 use std::hash::Hash;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub enum Block {
-    Span,
-    Block,
-}
-
 #[derive(Debug, Eq, Hash, PartialEq, Serialize, Deserialize)]
 pub enum Style {
+    #[serde(alias = "h1")]
     H1,
+    #[serde(alias = "h2")]
     H2,
+    #[serde(alias = "h3")]
     H3,
+    #[serde(alias = "h4")]
     H4,
+    #[serde(alias = "h5")]
     H5,
+    #[serde(alias = "normal")]
     Normal,
+    #[serde(alias = "blockquote")]
     Blockquote,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
 pub enum Children {
-    Text(TextNode),
-    Node(Node),
+    #[serde(alias = "span")]
+    Span(TextNode),
+    #[serde(alias = "block")]
+    Block(Node),
+}
+
+impl Serialize for Children {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let mut state = serializer.serialize_struct("children", 2)?;
+        match self {
+            Children::Span(text) => {
+                state.serialize_field("text", &text.text)?;
+            }
+            Children::Block(node) => {
+                state.serialize_field("node", &node)?;
+            }
+        }
+        state.end()
+    }
 }
 
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
     pub _key: String,
-    pub _type: Block,
+    pub _type: String,
     pub children: Vec<Children>,
     pub style: Style,
 }
@@ -54,10 +77,10 @@ impl Render for Node {
         };
         for child in &self.children {
             match child {
-                Children::Text(text) => {
+                Children::Span(text) => {
                     result.push_str(&format!("<{}>{}</{}>", tag, text.text, tag));
                 }
-                Children::Node(node) => {
+                Children::Block(node) => {
                     result.push_str(&node.html());
                 }
             }
@@ -105,5 +128,28 @@ mod test {
 
         let deserialized: TextNode = serde_json::from_str(result).unwrap();
         assert_eq!(text, deserialized);
+    }
+
+    #[test]
+    fn serialize_portable_span_node() {
+        let result = r###"
+        {
+  "children": [
+    {
+      "_key": "12",
+      "text": "lorem is cool and i love it",
+      "_type": "span",
+      "marks": []
+    }
+  ],
+  "_type": "block",
+  "style": "normal",
+  "_key": "5dd024df8602",
+  "markDefs": []
+}
+"###;
+
+        let deserialized: Node = serde_json::from_str(result).unwrap();
+        println!("{:?}", deserialized);
     }
 }
