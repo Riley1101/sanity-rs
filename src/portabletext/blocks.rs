@@ -133,8 +133,14 @@ mod test {
     #[test]
     fn serialize_portable_span_node() {
         let result = r###"
-        {
+{
   "children": [
+    {
+      "_key": "12",
+      "text": "lorem is cool and i love it",
+      "_type": "span",
+      "marks": []
+    },
     {
       "_key": "12",
       "text": "lorem is cool and i love it",
@@ -150,6 +156,32 @@ mod test {
 "###;
 
         let deserialized: Node = serde_json::from_str(result).unwrap();
-        println!("{:?}", deserialized);
+        deserialized.children.iter().for_each(|child| {
+            if let Children::Span(text) = child {
+                assert_eq!(text.text, "lorem is cool and i love it");
+            }
+        });
+    }
+
+    #[test]
+    fn serialize_portable_block() {
+        let result = r###"
+        {
+  "children": [
+        {
+      "children": [],
+      "_type": "block",
+      "style": "normal",
+      "_key": "5dd024df8602",
+      "markDefs": []
+  }],
+  "_type": "block",
+  "style": "normal",
+  "_key": "5dd024df8602",
+  "markDefs": []
+}
+"###;
+
+        let deserialized: Node = serde_json::from_str(result).unwrap();
     }
 }
