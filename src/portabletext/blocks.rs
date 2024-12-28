@@ -111,6 +111,7 @@ impl PartialEq for TextNode {
 
 #[cfg(test)]
 mod test {
+    use super::Render;
     use super::*;
     #[test]
     fn serialize_text_node() {
@@ -166,22 +167,38 @@ mod test {
     #[test]
     fn serialize_portable_block() {
         let result = r###"
-        {
-  "children": [
-        {
-      "children": [],
-      "_type": "block",
-      "style": "normal",
-      "_key": "5dd024df8602",
-      "markDefs": []
-  }],
-  "_type": "block",
-  "style": "normal",
-  "_key": "5dd024df8602",
-  "markDefs": []
+{
+          "children": [
+            {
+              "_type": "span",
+              "marks": [],
+              "text": "Trees are like models of hierarchical data, such as file systems, family trees, and organizational charts. In my laGst articles, I talked about the basics of building trees and binary search trees, which are important data structures in computer science. If you haven’t read them check these out,",
+              "_key": "b199ef00ef3a0"
+            },
+
+{
+          "children": [
+            {
+              "_type": "span",
+              "marks": [],
+              "text": "Trees are like models of hierarchical data, such as file systems, family trees, and organizational charts. In my laGst articles, I talked about the basics of building trees and binary search trees, which are important data structures in computer science. If you haven’t read them check these out,",
+              "_key": "b199ef00ef3a0"
+            }
+          ],
+          "_type": "block",
+          "style": "normal",
+          "_key": "5dd024df8602",
+          "markDefs": []
+}
+          ],
+          "_type": "block",
+          "style": "normal",
+          "_key": "5dd024df8602",
+          "markDefs": []
 }
 "###;
 
         let deserialized: Node = serde_json::from_str(result).unwrap();
+        println!("{:?}", deserialized.html());
     }
 }
