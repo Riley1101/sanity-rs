@@ -165,6 +165,86 @@ mod test {
     }
 
     #[test]
+    fn serialize_portable_text_array() {
+        let result = r###"
+        [
+            {
+                "_key": "ead5dbb19902",
+              "children": [
+                {
+                  "_type": "span",
+                  "marks": [],
+                  "text": "My 5 year old setup, I can't live without as a software developer.",
+                  "_key": "23a6e67f091d0"
+                }
+              ],
+              "markDefs": [],
+              "_type": "block",
+              "style": "normal"
+           },
+           {
+      "_key": "ead5dbb19902",
+      "children": [
+        {
+          "_type": "span",
+          "marks": [],
+          "text": "My 5 year old setup, I can't live without as a software developer.",
+          "_key": "23a6e67f091d0"
+        }
+      ],
+      "markDefs": [],
+      "_type": "block",
+      "style": "normal"
+    },
+    {
+      "_key": "3b00a41060fb",
+      "children": [
+        {
+          "_type": "span",
+          "marks": [],
+          "text": "I am a huge fan of customizing my workflows and setup. I love the ability to code fast, ability to find/consume information without thinking to much and the ability to navigate within my operating system with my muscle memory.",
+          "_key": "cafac127eece0"
+        }
+      ],
+      "markDefs": [],
+      "_type": "block",
+      "style": "normal"
+    },
+    {
+      "_key": "21898aa4a1a1",
+      "children": [
+        {
+          "_type": "span",
+          "marks": [],
+          "text": "I have always love the joy of tweaking my Ubuntu to tailor my needs from shortcuts, themes, applets to desktop environment. But everything changed once I learnt about tiling window managers.",
+          "_key": "b35ab08c59bc0"
+        }
+      ],
+      "markDefs": [],
+      "_type": "block",
+      "style": "normal"
+    },
+    {
+      "_key": "1db652715268",
+      "markDefs": [],
+      "_type": "block",
+      "style": "normal",
+      "children": [
+        {
+          "_type": "span",
+          "marks": [],
+          "_key": "09a785ba12c0",
+          "text": ""
+        }
+      ]
+    }
+       ]
+    "###;
+        let deserialized: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(result);
+        assert!(deserialized.is_ok());
+    }
+
+    #[test]
     fn serialize_portable_block() {
         let result = r###"
 {
@@ -175,30 +255,43 @@ mod test {
               "text": "Trees are like models of hierarchical data, such as file systems, family trees, and organizational charts. In my laGst articles, I talked about the basics of building trees and binary search trees, which are important data structures in computer science. If you haven’t read them check these out,",
               "_key": "b199ef00ef3a0"
             },
-
-{
-          "children": [
             {
-              "_type": "span",
-              "marks": [],
-              "text": "Trees are like models of hierarchical data, such as file systems, family trees, and organizational charts. In my laGst articles, I talked about the basics of building trees and binary search trees, which are important data structures in computer science. If you haven’t read them check these out,",
-              "_key": "b199ef00ef3a0"
+                      "children": [
+                        {
+                          "_type": "span",
+                          "marks": [],
+                          "text": "Trees are like models of hierarchical data, such as file systems, family trees, and organizational charts. In my laGst articles, I talked about the basics of building trees and binary search trees, which are important data structures in computer science. If you haven’t read them check these out,",
+                          "_key": "b199ef00ef3a0"
+                        }
+                      ],
+                      "_type": "block",
+                      "style": "normal",
+                      "_key": "5dd024df8602",
+                      "markDefs": []
+            },
+            {
+              "_type": "block",
+              "style": "normal",
+              "_key": "feda0bc195f3",
+              "markDefs": [],
+              "children": [
+                {
+                  "_type": "span",
+                  "marks": [],
+                  "text": "Let’s take a look at how you can traverse a tree by visiting each node in a particular order. Traversing a tree can be done using different methods, depending on what you want to achieve. Two common traversal algorithms are depth-first search (DFS) and breadth-first search (BFS). DFS goes as deep as possible in a branch before coming back to check other branches. BFS checks all nodes at the same level before moving to the next level.",
+                  "_key": "01bc35fb9ea60"
+                }
+              ]
             }
-          ],
-          "_type": "block",
-          "style": "normal",
-          "_key": "5dd024df8602",
-          "markDefs": []
-}
-          ],
-          "_type": "block",
-          "style": "normal",
-          "_key": "5dd024df8602",
-          "markDefs": []
+        ],
+        "_type": "block",
+        "style": "normal",
+        "_key": "5dd024df8602",
+        "markDefs": []
 }
 "###;
 
-        let deserialized: Node = serde_json::from_str(result).unwrap();
-        println!("{:?}", deserialized.html());
+        let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(result);
+        assert!(deserialized.is_ok());
     }
 }
