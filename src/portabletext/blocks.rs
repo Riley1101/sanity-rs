@@ -333,6 +333,125 @@ mod test {
         "###;
 
         let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(mark_defs_content);
-        println!("{:?}", deserialized.unwrap());
+        assert!(deserialized.is_ok());
+    }
+
+    #[test]
+    fn sample_block() {
+        let query = r###"
+         {
+            "_key": "ead5dbb19902",
+            "children": [
+              {
+                "_type": "span",
+                "marks": [],
+                "text": "My 4 years",
+                "_key": "23a6e67f091d0"
+              },
+              {
+                "_key": "ead5dbb19902",
+                "_type": "block",
+                "style": "normal",
+                "markDefs": [],
+                "children": [
+                    {
+                        "_type": "block",
+                        "markDefs": [],
+                        "_key": "5dd024df8602",
+                        "style": "normal",
+                        "children": [
+                          {
+                            "_type": "span",
+                            "marks": [],
+                            "text": "Apple of my balls",
+                            "_key": "b199ef00ef3a0"
+                          }
+                        ]
+                    }
+                ]
+              }
+            ],
+            "markDefs": [
+              {
+                "_key": "ead5dbb19902",
+                "_type": "strong",
+                "color": "red",
+                "font-size": "12px",
+                "font-weight": "bold"
+              }
+            ],
+            "_type": "block",
+            "style": "normal"
+          }
+    "###;
+        let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(query);
+        assert!(deserialized.is_ok());
+    }
+
+    #[test]
+    fn render_an_article() {
+        let query = r###"
+         [
+    {
+      "_key": "ead5dbb19902",
+      "_type": "block",
+      "children": [
+        {
+          "_key": "23a6e67f091d0",
+          "_type": "span",
+          "marks": [],
+          "text": "My 5 year old setup, I can't live without as a software developer."
+        }
+      ],
+      "markDefs": [],
+      "style": "normal"
+    },
+    {
+      "_key": "3b00a41060fb",
+      "_type": "block",
+      "children": [
+        {
+          "_key": "cafac127eece0",
+          "_type": "span",
+          "marks": [],
+          "text": "I am a huge fan of customizing my workflows and setup. I love the ability to code fast, ability to find/consume information without thinking to much and the ability to navigate within my operating system with my muscle memory."
+        }
+      ],
+      "markDefs": [],
+      "style": "normal"
+    },
+    {
+      "_key": "21898aa4a1a1",
+      "_type": "block",
+      "children": [
+        {
+          "_key": "b35ab08c59bc0",
+          "_type": "span",
+          "marks": [],
+          "text": "I have always love the joy of tweaking my Ubuntu to tailor my needs from shortcuts, themes, applets to desktop environment. But everything changed once I learnt about tiling window managers."
+        }
+      ],
+      "markDefs": [],
+      "style": "normal"
+    },
+    {
+      "_key": "1db652715268",
+      "_type": "block",
+      "children": [
+        {
+          "_key": "09a785ba12c0",
+          "_type": "span",
+          "marks": [],
+          "text": ""
+        }
+      ],
+      "markDefs": [],
+      "style": "normal"
+    }
+  ]
+        "###;
+        let deserialized: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(query);
+        assert!(deserialized.is_ok());
+
     }
 }
