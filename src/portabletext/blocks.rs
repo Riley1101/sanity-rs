@@ -431,6 +431,12 @@ mod test {
           "_type": "span",
           "marks": [],
           "text": "My 5 year old setup, I can't live without as a software developer."
+        },
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
         }
       ],
       "markDefs": [],
@@ -445,6 +451,12 @@ mod test {
           "_type": "span",
           "marks": [],
           "text": "I am a huge fan of customizing my workflows and setup. I love the ability to code fast, ability to find/consume information without thinking to much and the ability to navigate within my operating system with my muscle memory."
+        },
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
         }
       ],
       "markDefs": [],
@@ -459,6 +471,12 @@ mod test {
           "_type": "span",
           "marks": [],
           "text": "I have always love the joy of tweaking my Ubuntu to tailor my needs from shortcuts, themes, applets to desktop environment. But everything changed once I learnt about tiling window managers."
+        },
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
         }
       ],
       "markDefs": [],
@@ -495,6 +513,6 @@ mod test {
         }
         "###;
         let deserialized: Result<CodeNode, serde_json::Error> = serde_json::from_str(result);
-        println!("{:?}", deserialized.unwrap().html());
+        assert!(deserialized.is_ok());
     }
 }
