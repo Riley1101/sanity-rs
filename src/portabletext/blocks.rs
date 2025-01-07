@@ -2,6 +2,7 @@
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
 use std::cmp::PartialEq;
+use std::collections::HashMap;
 use std::fmt::Display;
 use std::hash::Hash;
 
@@ -50,12 +51,22 @@ impl Serialize for Children {
     }
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct MarkDefs {
+    pub _key: String,
+    pub _type: String,
+    #[serde(flatten)]
+    pub extra: HashMap<String, String>,
+}
+
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
     pub _key: String,
     pub _type: String,
     pub children: Vec<Children>,
+    #[serde(alias = "markDefs")]
+    pub mark_defs: Vec<MarkDefs>,
     pub style: Style,
 }
 
@@ -111,7 +122,6 @@ impl PartialEq for TextNode {
 
 #[cfg(test)]
 mod test {
-    use super::Render;
     use super::*;
     #[test]
     fn serialize_text_node() {
@@ -293,5 +303,36 @@ mod test {
 
         let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(result);
         assert!(deserialized.is_ok());
+    }
+
+    #[test]
+    fn mark_defs_test() {
+        let mark_defs_content = r###"
+        {
+            "_key": "ead5dbb19902",
+            "children": [
+              {
+                "_type": "span",
+                "marks": [],
+                "text": "My 5 year old setup, I can't live without as a software developer.",
+                "_key": "23a6e67f091d0"
+              }
+            ],
+            "markDefs": [
+              {
+                "_key": "ead5dbb19902",
+                "_type": "strong",
+                "color": "red",
+                "font-size": "12px",
+                "font-weight": "bold"
+              }
+            ],
+            "_type": "block",
+            "style": "normal"
+          }
+        "###;
+
+        let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(mark_defs_content);
+        println!("{:?}", deserialized.unwrap());
     }
 }
