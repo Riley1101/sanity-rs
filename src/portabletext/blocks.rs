@@ -24,6 +24,23 @@ pub enum Style {
     Blockquote,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CodeNode {
+    _key: String,
+    _type: String,
+    code: String,
+    language: String,
+}
+
+impl Render for CodeNode {
+    fn html(&self) -> String {
+        format!(
+            "<pre><code class=\"language-{}\">{}</code></pre>",
+            self.language, self.code
+        )
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Children {
@@ -31,6 +48,9 @@ pub enum Children {
     Span(TextNode),
     #[serde(alias = "block")]
     Block(Node),
+
+    #[serde(alias = "code")]
+    Code(CodeNode),
 }
 
 impl Serialize for Children {
@@ -45,6 +65,10 @@ impl Serialize for Children {
             }
             Children::Block(node) => {
                 state.serialize_field("node", &node)?;
+            }
+            Children::Code(code) => {
+                state.serialize_field("code", &code.code)?;
+                state.serialize_field("language", &code.language)?;
             }
         }
         state.end()
@@ -93,6 +117,12 @@ impl Render for Node {
                 }
                 Children::Block(node) => {
                     result.push_str(&node.html());
+                }
+                Children::Code(code) => {
+                    result.push_str(&format!(
+                        "<pre><code class=\"language-{}\">{}</code></pre>",
+                        code.language, code.code
+                    ));
                 }
             }
         }
@@ -452,6 +482,19 @@ mod test {
         "###;
         let deserialized: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(query);
         assert!(deserialized.is_ok());
+    }
 
+    #[test]
+    fn serialize_code() {
+        let result = r###"
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
+        }
+        "###;
+        let deserialized: Result<CodeNode, serde_json::Error> = serde_json::from_str(result);
+        println!("{:?}", deserialized.unwrap().html());
     }
 }
