@@ -90,6 +90,7 @@ mod test {
             _key: "key".to_string(),
             style: Style::H2,
             _type: "block".to_string(),
+            mark_defs: vec![],
             children: vec![Children::Span(text)],
         };
 
@@ -97,6 +98,7 @@ mod test {
             _key: "key".to_string(),
             style: Style::H1,
             _type: "block".to_string(),
+            mark_defs: vec![],
             children: vec![Children::Span(text2), Children::Block(h2)],
         };
 
@@ -127,12 +129,14 @@ mod test {
         let blockquote = Node {
             _key: "key".to_string(),
             style: Style::Blockquote,
+            mark_defs: vec![],
             _type: "block".to_string(),
             children: vec![Children::Span(text2)],
         };
 
         let paragraph = Node {
             _key: "key".to_string(),
+            mark_defs: vec![],
             style: Style::Normal,
             _type: "span".to_string(),
             children: vec![Children::Span(text)],
@@ -163,6 +167,7 @@ mod test {
         };
 
         let blockquote = Node {
+            mark_defs: vec![],
             _key: "key".to_string(),
             style: Style::Blockquote,
             _type: "block".to_string(),
@@ -171,6 +176,7 @@ mod test {
 
         let paragraph = Node {
             _key: "key".to_string(),
+            mark_defs: vec![],
             style: Style::Normal,
             _type: "block".to_string(),
             children: vec![Children::Span(text)],
