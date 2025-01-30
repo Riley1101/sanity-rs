@@ -100,7 +100,7 @@ pub trait Render {
 
 impl Render for Node {
     fn html(&self) -> String {
-        let mut result = String::from("");
+        let mut result = format!("");
         let tag = match &self.style {
             Style::H1 => "h1",
             Style::H2 => "h2",
@@ -113,7 +113,8 @@ impl Render for Node {
         for child in &self.children {
             match child {
                 Children::Span(text) => {
-                    result.push_str(&format!("<{}>{}</{}>", tag, text.text, tag));
+                    println!("{:?}", text);
+                    result.push_str(&format!("{}", text.text));
                 }
                 Children::Block(node) => {
                     result.push_str(&node.html());
@@ -126,6 +127,7 @@ impl Render for Node {
                 }
             }
         }
+        result = format!("<{}>{}</{}>", tag, result, tag);
         result
     }
 }
