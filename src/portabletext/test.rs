@@ -83,6 +83,7 @@ mod basic {
       "_key": "cZUQGmh4",
       "_type": "span",
       "marks": [
+        "code",
         "code"
       ],
       "text": "sanity"
@@ -99,7 +100,7 @@ mod basic {
 }
     "#;
         let node = serde_json::from_str::<Node>(input);
-        println!("{:?}", node);
+        println!("{:?}", node.unwrap().html());
         // assert_eq!(
         //     node.unwrap().html(),
         //     "<p><code>sanity</code> is the name of the CLI tool.</p>"

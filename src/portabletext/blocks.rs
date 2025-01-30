@@ -113,8 +113,15 @@ impl Render for Node {
         for child in &self.children {
             match child {
                 Children::Span(text) => {
-                    println!("{:?}", text);
-                    result.push_str(&format!("{}", text.text));
+                    let mut marks_clone = text.marks.clone();
+                    let mut wrapped_text = text.text.clone();
+
+                    while let Some(mark) = marks_clone.pop() {
+                        wrapped_text = format!("<{}>{}</{}>", mark, wrapped_text, mark);
+                    }
+
+                    println!("{:?}", wrapped_text);
+                    result.push_str(&wrapped_text);
                 }
                 Children::Block(node) => {
                     result.push_str(&node.html());
@@ -127,6 +134,7 @@ impl Render for Node {
                 }
             }
         }
+        println!("================= ");
         result = format!("<{}>{}</{}>", tag, result, tag);
         result
     }
