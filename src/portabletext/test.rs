@@ -83,7 +83,6 @@ mod basic {
       "_key": "cZUQGmh4",
       "_type": "span",
       "marks": [
-        "code",
         "code"
       ],
       "text": "sanity"
@@ -100,10 +99,92 @@ mod basic {
 }
     "#;
         let node = serde_json::from_str::<Node>(input);
-        println!("{:?}", node.unwrap().html());
-        // assert_eq!(
-        //     node.unwrap().html(),
-        //     "<p><code>sanity</code> is the name of the CLI tool.</p>"
-        // );
+        assert_eq!(
+            node.unwrap().html(),
+            "<p><code>sanity</code> is the name of the CLI tool.</p>"
+        );
+    }
+
+    #[test]
+    fn basic_mark_multiple_adjacent_span() {
+        let input = r#"
+{
+  "_key": "R5FvMrjo",
+  "_type": "block",
+  "children": [
+    {
+      "_key": "cZUQGmh4",
+      "_type": "span",
+      "marks": [
+        "strong"
+      ],
+      "text": "A word of"
+    },
+    {
+      "_key": "toaiCqIK",
+      "_type": "span",
+      "marks": [
+        "strong"
+      ],
+      "text": " warning;"
+    },
+    {
+      "_key": "gaZingA",
+      "_type": "span",
+      "marks": [],
+      "text": " Sanity is addictive."
+    }
+  ],
+  "markDefs": [],
+  "style": "normal"
+}        
+"#;
+        let node = serde_json::from_str::<Node>(input);
+        assert_eq!(
+            node.unwrap().html(),
+            "<p><strong>A word of</strong><strong> warning;</strong> Sanity is addictive.</p>"
+        );
+    }
+
+    #[test]
+    fn basic_mark_multiple_nested_marks() {
+        let input = r#"
+        {
+  "_key": "R5FvMrjo",
+  "_type": "block",
+  "children": [
+    {
+      "_key": "cZUQGmh4",
+      "_type": "span",
+      "marks": [
+        "strong"
+      ],
+      "text": "A word of "
+    },
+    {
+      "_key": "toaiCqIK",
+      "_type": "span",
+      "marks": [
+        "strong",
+        "em"
+      ],
+      "text": "warning;"
+    },
+    {
+      "_key": "gaZingA",
+      "_type": "span",
+      "marks": [],
+      "text": " Sanity is addictive."
+    }
+  ],
+  "markDefs": [],
+  "style": "normal"
+}
+        "#;
+        let node = serde_json::from_str::<Node>(input);
+        assert_eq!(
+            node.unwrap().html(),
+            "<p><strong>A word of </strong><strong><em>warning;</em></strong> Sanity is addictive.</p>"
+        );
     }
 }
