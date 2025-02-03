@@ -75,6 +75,56 @@ impl Serialize for Children {
     }
 }
 
+struct MarkResult {
+    lhs: String,
+    rhs: String,
+}
+
+enum MarkType {
+    Code,
+    Link,
+    Unknown,
+}
+
+pub struct Mark {
+    _type: MarkType,
+}
+
+impl Mark {
+    pub fn new(r#type: MarkType) -> Self {
+        Self { _type: r#type }
+    }
+    pub fn render(&self, extra: &HashMap<String, String>) -> MarkResult {
+        match self._type {
+            MarkType::Code => {
+                let language = if let Some(language) = extra.get("language") {
+                    language
+                } else {
+                    ""
+                };
+                MarkResult {
+                    lhs: format!("<pre><code class=\"language-{}\">", language),
+                    rhs: format!("</code></pre>"),
+                }
+            }
+            MarkType::Link => {
+                let href = extra.get("href");
+                MarkResult {
+                    lhs: format!("<a href=\"{}\">", href.unwrap()),
+                    rhs: format!("</a>"),
+                }
+            }
+            MarkType::Unknown => {
+                println!("Unknown mark type");
+                MarkResult {
+                    lhs: String::new(),
+                    rhs: String::new(),
+                }
+            }
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct MarkDefs {
     pub _key: String,
@@ -111,12 +161,15 @@ impl Render for Node {
             Style::Blockquote => "blockquote",
         };
         for child in &self.children {
+            let mark_defs = self.mark_defs;
             match child {
                 Children::Span(text) => {
                     let mut marks_clone = text.marks.clone();
                     let mut wrapped_text = text.text.clone();
                     while let Some(mark) = marks_clone.pop() {
-                        wrapped_text = format!("<{}>{}</{}>", mark, wrapped_text, mark);
+                        let mark = Mark::new(mark);
+                        let mark = mark.render();
+                        wrapped_text = format!("<{}>{}</{}>", "", wrapped_text, "");
                     }
                     result.push_str(&wrapped_text);
                 }

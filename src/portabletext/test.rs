@@ -187,4 +187,47 @@ mod basic {
             "<p><strong>A word of </strong><strong><em>warning;</em></strong> Sanity is addictive.</p>"
         );
     }
+
+    #[test]
+    fn link_mark_defs() {
+        let input = r#"
+        {
+  "_key": "R5FvMrjo",
+  "_type": "block",
+  "children": [
+    {
+      "_key": "cZUQGmh4",
+      "_type": "span",
+      "marks": [],
+      "text": "A word of warning; "
+    },
+    {
+      "_key": "toaiCqIK",
+      "_type": "span",
+      "marks": [
+        "someLinkId"
+      ],
+      "text": "Sanity"
+    },
+    {
+      "_key": "gaZingA",
+      "_type": "span",
+      "marks": [],
+      "text": " is addictive."
+    }
+  ],
+  "markDefs": [
+    {
+      "_type": "link",
+      "_key": "someLinkId",
+      "href": "https://sanity.io/"
+    }
+  ],
+  "style": "normal"
+}
+      "#;
+
+        let node = serde_json::from_str::<Node>(input);
+        println!("{}", node.unwrap().html());
+    }
 }
