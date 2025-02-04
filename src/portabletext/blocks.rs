@@ -184,7 +184,6 @@ impl Render for Node {
                 Children::Span(text) => {
                     let mut marks_clone = text.marks.clone();
                     let mut wrapped_text = text.text.clone();
-                    println!("marks: {:?}", marks_clone);
                     while let Some(mark) = marks_clone.pop() {
                         let mark_s = Mark::new(mark.clone());
                         match mark_s._type {
