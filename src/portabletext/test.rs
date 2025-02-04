@@ -255,4 +255,68 @@ mod basic {
         let node = serde_json::from_str::<Node>(input);
         assert_eq!(node.unwrap().html(), "<h2>Dat heading</h2>");
     }
+
+    #[test]
+    fn messay_block_with_link() {
+        let input = r###"
+    {
+      "_type": "block",
+      "_key": "anything",
+      "children": [
+        {
+          "_key": "a1ph4",
+          "_type": "span",
+          "marks": [
+            "zomgLink"
+          ],
+          "text": "Sanity"
+        },
+        {
+          "_key": "b374",
+          "_type": "span",
+          "marks": [],
+          "text": " can be used to power almost any "
+        },
+        {
+          "_key": "ch4r1i3",
+          "_type": "span",
+          "marks": [
+            "zomgLink",
+            "strong",
+            "em"
+          ],
+          "text": "app"
+        },
+        {
+          "_key": "d3174",
+          "_type": "span",
+          "marks": [
+            "em",
+            "zomgLink"
+          ],
+          "text": " or website"
+        },
+        {
+          "_key": "ech0",
+          "_type": "span",
+          "marks": [],
+          "text": "."
+        }
+      ],
+      "markDefs": [
+        {
+          "_key": "zomgLink",
+          "_type": "link",
+          "href": "https://sanity.io/"
+        }
+      ],
+      "style": "blockquote"
+    }
+    "###;
+        let node = serde_json::from_str::<Node>(input);
+        assert_eq!(
+            node.unwrap().html(),
+            r###"<blockquote><a href="https://sanity.io/">Sanity</a> can be used to power almost any <a href="https://sanity.io/"><em><strong>app</strong> or website</em></a>.</blockquote>"###
+        );
+    }
 }
