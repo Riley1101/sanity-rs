@@ -75,24 +75,36 @@ impl Serialize for Children {
     }
 }
 
-struct MarkResult {
+#[derive(Debug)]
+pub struct MarkResult {
     lhs: String,
     rhs: String,
 }
 
+#[derive(Debug)]
 enum MarkType {
     Code,
     Link,
+    Strong,
+    Em,
     Unknown,
 }
 
+#[derive(Debug)]
 pub struct Mark {
     _type: MarkType,
 }
 
 impl Mark {
-    pub fn new(r#type: MarkType) -> Self {
-        Self { _type: r#type }
+    pub fn new(_type: String) -> Self {
+        let _type = match _type.as_str() {
+            "code" => MarkType::Code,
+            "em" => MarkType::Em,
+            "link" => MarkType::Link,
+            "strong" => MarkType::Strong,
+            _ => MarkType::Unknown,
+        };
+        Self { _type }
     }
     pub fn render(&self, extra: &HashMap<String, String>) -> MarkResult {
         match self._type {
@@ -114,6 +126,14 @@ impl Mark {
                     rhs: format!("</a>"),
                 }
             }
+            MarkType::Em => MarkResult {
+                lhs: format!("<em>"),
+                rhs: format!("</em>"),
+            },
+            MarkType::Strong => MarkResult {
+                lhs: format!("<strong>"),
+                rhs: format!("</strong>"),
+            },
             MarkType::Unknown => {
                 println!("Unknown mark type");
                 MarkResult {
@@ -161,14 +181,29 @@ impl Render for Node {
             Style::Blockquote => "blockquote",
         };
         for child in &self.children {
-            let mark_defs = self.mark_defs;
+            let mark_defs = &self.mark_defs;
             match child {
                 Children::Span(text) => {
                     let mut marks_clone = text.marks.clone();
                     let mut wrapped_text = text.text.clone();
                     while let Some(mark) = marks_clone.pop() {
-                        let mark = Mark::new(mark);
-                        let mark = mark.render();
+                        println!("Mark type before {:?}", mark);
+                        let mark_s = Mark::new(mark.clone());
+                        match mark_s._type {
+                            MarkType::Unknown => {
+                                let mark_result = mark_s.render(
+                                    &mark_defs
+                                        .iter()
+                                        .find(|mark_def| mark_def._key == mark)
+                                        .unwrap()
+                                        .extra,
+                                );
+                                println!("Mark result {:?}", mark_result);
+                                continue;
+                            }
+                            _ => {}
+                        }
+                        println!("Mark type after {:?}", mark);
                         wrapped_text = format!("<{}>{}</{}>", "", wrapped_text, "");
                     }
                     result.push_str(&wrapped_text);
