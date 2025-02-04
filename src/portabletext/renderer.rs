@@ -57,7 +57,6 @@ impl Renderer {
             let callback = match callback {
                 Some(callback) => callback,
                 None => {
-                    println!("ites being called");
                     result.push_str(&default_callback(node));
                     continue;
                 }

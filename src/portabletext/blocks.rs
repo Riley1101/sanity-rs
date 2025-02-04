@@ -100,13 +100,13 @@ impl Mark {
         let _type = match _type.as_str() {
             "code" => MarkType::Code,
             "em" => MarkType::Em,
-            "link" => MarkType::Link,
             "strong" => MarkType::Strong,
             _ => MarkType::Unknown,
         };
         Self { _type }
     }
-    pub fn render(&self, extra: &HashMap<String, String>) -> MarkResult {
+    pub fn render(&self, mark_def: &MarkDefs) -> MarkResult {
+        let extra = &mark_def.extra;
         match self._type {
             MarkType::Code => {
                 let language = if let Some(language) = extra.get("language") {
@@ -119,8 +119,9 @@ impl Mark {
                     rhs: format!("</code></pre>"),
                 }
             }
-            MarkType::Link => {
+            MarkType::Unknown => {
                 let href = extra.get("href");
+
                 MarkResult {
                     lhs: format!("<a href=\"{}\">", href.unwrap()),
                     rhs: format!("</a>"),
@@ -134,13 +135,10 @@ impl Mark {
                 lhs: format!("<strong>"),
                 rhs: format!("</strong>"),
             },
-            MarkType::Unknown => {
-                println!("Unknown mark type");
-                MarkResult {
-                    lhs: String::new(),
-                    rhs: String::new(),
-                }
-            }
+            _ => MarkResult {
+                lhs: String::new(),
+                rhs: String::new(),
+            },
         }
     }
 }
@@ -187,24 +185,23 @@ impl Render for Node {
                     let mut marks_clone = text.marks.clone();
                     let mut wrapped_text = text.text.clone();
                     while let Some(mark) = marks_clone.pop() {
-                        println!("Mark type before {:?}", mark);
                         let mark_s = Mark::new(mark.clone());
                         match mark_s._type {
                             MarkType::Unknown => {
-                                let mark_result = mark_s.render(
-                                    &mark_defs
-                                        .iter()
-                                        .find(|mark_def| mark_def._key == mark)
-                                        .unwrap()
-                                        .extra,
+                                let def_borrowed = mark_defs
+                                    .iter()
+                                    .find(|mark_def| mark_def._key == mark)
+                                    .unwrap();
+                                let mark_result = mark_s.render(&def_borrowed);
+                                wrapped_text = format!(
+                                    "{}{}{}",
+                                    mark_result.lhs, wrapped_text, mark_result.rhs
                                 );
-                                println!("Mark result {:?}", mark_result);
-                                continue;
                             }
-                            _ => {}
+                            _ => {
+                                wrapped_text = format!("<{}>{}</{}>", mark, wrapped_text, mark);
+                            }
                         }
-                        println!("Mark type after {:?}", mark);
-                        wrapped_text = format!("<{}>{}</{}>", "", wrapped_text, "");
                     }
                     result.push_str(&wrapped_text);
                 }

@@ -228,6 +228,9 @@ mod basic {
       "#;
 
         let node = serde_json::from_str::<Node>(input);
-        println!("{}", node.unwrap().html());
+        assert_eq!(
+            node.unwrap().html(),
+            "<p>A word of warning; <a href=\"https://sanity.io/\">Sanity</a> is addictive.</p>"
+        );
     }
 }
