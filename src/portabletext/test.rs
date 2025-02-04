@@ -314,9 +314,43 @@ mod basic {
     }
     "###;
         let node = serde_json::from_str::<Node>(input);
+    // TODO check duplicates
         assert_eq!(
             node.unwrap().html(),
             r###"<blockquote><a href="https://sanity.io/">Sanity</a> can be used to power almost any <a href="https://sanity.io/"><em><strong>app</strong> or website</em></a>.</blockquote>"###
         );
+    }
+
+    #[test]
+    fn real_test() {
+        let input = r###"
+{
+  "_type": "block",
+  "_key": "e054183e050c",
+  "style": "normal",
+  "markDefs": [
+    {
+      "_type": "link",
+      "_key": "1544d13f0bd3",
+      "href": "https://apple.com"
+    }
+  ],
+  "children": [
+    {
+      "_type": "span",
+      "_key": "9993d9fa4266",
+      "text": "Hello",
+      "marks": [
+        "1544d13f0bd3",
+        "code",
+        "strong"
+      ]
+    }
+  ]
+}
+   "###;
+
+        let node = serde_json::from_str::<Node>(input);
+        println!("{:?}", node.unwrap().html());
     }
 }
