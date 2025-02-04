@@ -233,4 +233,26 @@ mod basic {
             "<p>A word of warning; <a href=\"https://sanity.io/\">Sanity</a> is addictive.</p>"
         );
     }
+
+    #[test]
+    fn plane_header_block() {
+        let input = r###"
+        {
+  "_key": "R5FvMrjo",
+  "_type": "block",
+  "children": [
+    {
+      "_key": "cZUQGmh4",
+      "_type": "span",
+      "marks": [],
+      "text": "Dat heading"
+    }
+  ],
+  "markDefs": [],
+  "style": "h2"
+}
+        "###;
+        let node = serde_json::from_str::<Node>(input);
+        assert_eq!(node.unwrap().html(), "<h2>Dat heading</h2>");
+    }
 }
