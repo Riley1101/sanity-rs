@@ -84,10 +84,11 @@ pub struct MarkResult {
 #[derive(Debug)]
 enum MarkType {
     Code,
-    Link,
     Strong,
     Em,
     Unknown,
+    Underline,
+    StrikeThrough,
 }
 
 #[derive(Debug)]
@@ -101,6 +102,8 @@ impl Mark {
             "code" => MarkType::Code,
             "em" => MarkType::Em,
             "strong" => MarkType::Strong,
+            "strike-through" => MarkType::StrikeThrough,
+            "underline" => MarkType::Underline,
             _ => MarkType::Unknown,
         };
         Self { _type }
@@ -108,37 +111,39 @@ impl Mark {
     pub fn render(&self, mark_def: &MarkDefs) -> MarkResult {
         let extra = &mark_def.extra;
         match self._type {
-            MarkType::Code => {
-                let language = if let Some(language) = extra.get("language") {
-                    language
-                } else {
-                    ""
-                };
-                MarkResult {
-                    lhs: format!("<pre><code class=\"language-{}\">", language),
-                    rhs: format!("</code></pre>"),
-                }
-            }
-            MarkType::Unknown => {
-                let href = extra.get("href");
-
-                MarkResult {
-                    lhs: format!("<a href=\"{}\">", href.unwrap()),
-                    rhs: format!("</a>"),
-                }
-            }
+            MarkType::StrikeThrough => MarkResult {
+                lhs: String::from("<del>"),
+                rhs: String::from("</del>"),
+            },
+            MarkType::Underline => MarkResult {
+                lhs: String::from("<u>"),
+                rhs: String::from("</u>"),
+            },
             MarkType::Em => MarkResult {
-                lhs: format!("<em>"),
-                rhs: format!("</em>"),
+                lhs: String::from("<em>"),
+                rhs: String::from("</em>"),
             },
             MarkType::Strong => MarkResult {
-                lhs: format!("<strong>"),
-                rhs: format!("</strong>"),
+                lhs: String::from("<strong>"),
+                rhs: String::from("</strong>"),
             },
-            _ => MarkResult {
-                lhs: String::new(),
-                rhs: String::new(),
+            MarkType::Code => MarkResult {
+                lhs: String::from("<code>"),
+                rhs: String::from("</code>"),
             },
+            MarkType::Unknown => {
+                if let Some(href) = extra.get("href") {
+                    MarkResult {
+                        lhs: format!("<a href=\"{}\">", href),
+                        rhs: format!("</a>"),
+                    }
+                } else {
+                    MarkResult {
+                        lhs: String::new(),
+                        rhs: String::new(),
+                    }
+                }
+            }
         }
     }
 }
@@ -186,23 +191,21 @@ impl Render for Node {
                     let mut wrapped_text = text.text.clone();
                     while let Some(mark) = marks_clone.pop() {
                         let mark_s = Mark::new(mark.clone());
-                        match mark_s._type {
-                            MarkType::Unknown => {
-                                // !TODO remove the unwrap
-                                let def_borrowed = mark_defs
-                                    .iter()
-                                    .find(|mark_def| mark_def._key == mark)
-                                    .unwrap();
-                                let mark_result = mark_s.render(&def_borrowed);
-                                wrapped_text = format!(
-                                    "{}{}{}",
-                                    mark_result.lhs, wrapped_text, mark_result.rhs
-                                );
+                        let def_borrowed = if let Some(def) =
+                            mark_defs.iter().find(|mark_def| mark_def._key == mark)
+                        {
+                            def
+                        } else {
+                            &MarkDefs {
+                                _key: String::new(),
+                                _type: String::new(),
+                                extra: HashMap::new(),
                             }
-                            _ => {
-                                wrapped_text = format!("<{}>{}</{}>", mark, wrapped_text, mark);
-                            }
-                        }
+                        };
+
+                        let mark_result = mark_s.render(&def_borrowed);
+                        wrapped_text =
+                            format!("{}{}{}", mark_result.lhs, wrapped_text, mark_result.rhs);
                     }
                     result.push_str(&wrapped_text);
                 }

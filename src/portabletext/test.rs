@@ -314,7 +314,6 @@ mod basic {
     }
     "###;
         let node = serde_json::from_str::<Node>(input);
-        // TODO check duplicates
         assert_eq!(
             node.unwrap().html(),
             r###"<blockquote><a href="https://sanity.io/">Sanity</a> can be used to power almost any <a href="https://sanity.io/"><strong><em>app</em></strong></a><em><a href="https://sanity.io/"> or website</a></em>.</blockquote>"###
@@ -322,7 +321,7 @@ mod basic {
     }
 
     #[test]
-    fn real_test() {
+    fn simple_a_p_tag() {
         let input = r###"
 {
   "_type": "block",
@@ -354,6 +353,80 @@ mod basic {
         assert_eq!(
             node.unwrap().html(),
             r###"<p><a href="https://apple.com"><code><strong>Hello</strong></code></a></p>"###
+        );
+    }
+
+    #[test]
+    fn all_basic_marks() {
+        let input = r###"
+    {
+  "_key": "R5FvMrjo",
+  "_type": "block",
+  "children": [
+    {
+      "_key": "a",
+      "_type": "span",
+      "marks": [
+        "code"
+      ],
+      "text": "code"
+    },
+    {
+      "_key": "b",
+      "_type": "span",
+      "marks": [
+        "strong"
+      ],
+      "text": "strong"
+    },
+    {
+      "_key": "c",
+      "_type": "span",
+      "marks": [
+        "em"
+      ],
+      "text": "em"
+    },
+    {
+      "_key": "d",
+      "_type": "span",
+      "marks": [
+        "underline"
+      ],
+      "text": "underline"
+    },
+    {
+      "_key": "e",
+      "_type": "span",
+      "marks": [
+        "strike-through"
+      ],
+      "text": "strike-through"
+    },
+    {
+      "_key": "f",
+      "_type": "span",
+      "marks": [
+        "dat-link"
+      ],
+      "text": "link"
+    }
+  ],
+  "markDefs": [
+    {
+      "_key": "dat-link",
+      "_type": "link",
+      "href": "https://www.sanity.io/"
+    }
+  ],
+  "style": "normal"
+}
+    "###;
+
+        let node = serde_json::from_str::<Node>(input);
+        assert_eq!(
+            node.unwrap().html(),
+            r###"<p><code>code</code><strong>strong</strong><em>em</em><u>underline</u><del>strike-through</del><a href="https://www.sanity.io/">link</a></p>"###
         );
     }
 }
