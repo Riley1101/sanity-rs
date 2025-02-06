@@ -28,6 +28,9 @@ fn default_callback(node: &Node) -> String {
             Children::Block(node) => {
                 result.push_str(&node.html());
             }
+            Children::Code(node) => {
+                result.push_str(&node.html());
+            }
         }
     }
     result

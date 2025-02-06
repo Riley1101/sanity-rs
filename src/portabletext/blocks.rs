@@ -24,6 +24,23 @@ pub enum Style {
     Blockquote,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct CodeNode {
+    _key: String,
+    _type: String,
+    code: String,
+    language: String,
+}
+
+impl Render for CodeNode {
+    fn html(&self) -> String {
+        format!(
+            "<pre><code class=\"language-{}\">{}</code></pre>",
+            self.language, self.code
+        )
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 pub enum Children {
@@ -31,6 +48,9 @@ pub enum Children {
     Span(TextNode),
     #[serde(alias = "block")]
     Block(Node),
+
+    #[serde(alias = "code")]
+    Code(CodeNode),
 }
 
 impl Serialize for Children {
@@ -46,8 +66,85 @@ impl Serialize for Children {
             Children::Block(node) => {
                 state.serialize_field("node", &node)?;
             }
+            Children::Code(code) => {
+                state.serialize_field("code", &code.code)?;
+                state.serialize_field("language", &code.language)?;
+            }
         }
         state.end()
+    }
+}
+
+#[derive(Debug)]
+pub struct MarkResult {
+    lhs: String,
+    rhs: String,
+}
+
+#[derive(Debug)]
+enum MarkType {
+    Code,
+    Strong,
+    Em,
+    Unknown,
+    Underline,
+    StrikeThrough,
+}
+
+#[derive(Debug)]
+pub struct Mark {
+    _type: MarkType,
+}
+
+impl Mark {
+    pub fn new(_type: String) -> Self {
+        let _type = match _type.as_str() {
+            "code" => MarkType::Code,
+            "em" => MarkType::Em,
+            "strong" => MarkType::Strong,
+            "strike-through" => MarkType::StrikeThrough,
+            "underline" => MarkType::Underline,
+            _ => MarkType::Unknown,
+        };
+        Self { _type }
+    }
+    pub fn render(&self, mark_def: &MarkDefs) -> MarkResult {
+        let extra = &mark_def.extra;
+        match self._type {
+            MarkType::StrikeThrough => MarkResult {
+                lhs: String::from("<del>"),
+                rhs: String::from("</del>"),
+            },
+            MarkType::Underline => MarkResult {
+                lhs: String::from("<u>"),
+                rhs: String::from("</u>"),
+            },
+            MarkType::Em => MarkResult {
+                lhs: String::from("<em>"),
+                rhs: String::from("</em>"),
+            },
+            MarkType::Strong => MarkResult {
+                lhs: String::from("<strong>"),
+                rhs: String::from("</strong>"),
+            },
+            MarkType::Code => MarkResult {
+                lhs: String::from("<code>"),
+                rhs: String::from("</code>"),
+            },
+            MarkType::Unknown => {
+                if let Some(href) = extra.get("href") {
+                    MarkResult {
+                        lhs: format!("<a href=\"{}\">", href),
+                        rhs: format!("</a>"),
+                    }
+                } else {
+                    MarkResult {
+                        lhs: String::new(),
+                        rhs: String::new(),
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -76,7 +173,7 @@ pub trait Render {
 
 impl Render for Node {
     fn html(&self) -> String {
-        let mut result = String::from("");
+        let mut result = String::new();
         let tag = match &self.style {
             Style::H1 => "h1",
             Style::H2 => "h2",
@@ -87,15 +184,43 @@ impl Render for Node {
             Style::Blockquote => "blockquote",
         };
         for child in &self.children {
+            let mark_defs = &self.mark_defs;
             match child {
                 Children::Span(text) => {
-                    result.push_str(&format!("<{}>{}</{}>", tag, text.text, tag));
+                    let mut marks_clone = text.marks.clone();
+                    let mut wrapped_text = text.text.clone();
+                    while let Some(mark) = marks_clone.pop() {
+                        let mark_s = Mark::new(mark.clone());
+                        let def_borrowed = if let Some(def) =
+                            mark_defs.iter().find(|mark_def| mark_def._key == mark)
+                        {
+                            def
+                        } else {
+                            &MarkDefs {
+                                _key: String::new(),
+                                _type: String::new(),
+                                extra: HashMap::new(),
+                            }
+                        };
+
+                        let mark_result = mark_s.render(&def_borrowed);
+                        wrapped_text =
+                            format!("{}{}{}", mark_result.lhs, wrapped_text, mark_result.rhs);
+                    }
+                    result.push_str(&wrapped_text);
                 }
                 Children::Block(node) => {
                     result.push_str(&node.html());
                 }
+                Children::Code(code) => {
+                    result.push_str(&format!(
+                        "<pre><code class=\"language-{}\">{}</code></pre>",
+                        code.language, code.code
+                    ));
+                }
             }
         }
+        result = format!("<{}>{}</{}>", tag, result, tag);
         result
     }
 }
@@ -401,6 +526,12 @@ mod test {
           "_type": "span",
           "marks": [],
           "text": "My 5 year old setup, I can't live without as a software developer."
+        },
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
         }
       ],
       "markDefs": [],
@@ -415,6 +546,12 @@ mod test {
           "_type": "span",
           "marks": [],
           "text": "I am a huge fan of customizing my workflows and setup. I love the ability to code fast, ability to find/consume information without thinking to much and the ability to navigate within my operating system with my muscle memory."
+        },
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
         }
       ],
       "markDefs": [],
@@ -429,6 +566,12 @@ mod test {
           "_type": "span",
           "marks": [],
           "text": "I have always love the joy of tweaking my Ubuntu to tailor my needs from shortcuts, themes, applets to desktop environment. But everything changed once I learnt about tiling window managers."
+        },
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
         }
       ],
       "markDefs": [],
@@ -452,6 +595,19 @@ mod test {
         "###;
         let deserialized: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(query);
         assert!(deserialized.is_ok());
+    }
 
+    #[test]
+    fn serialize_code() {
+        let result = r###"
+        {
+          "_key": "ead5dbb19902",
+          "_type": "code",
+          "code": "fn main() { println!(\"Hello, world!\"); }",
+          "language": "rust"
+        }
+        "###;
+        let deserialized: Result<CodeNode, serde_json::Error> = serde_json::from_str(result);
+        assert!(deserialized.is_ok());
     }
 }
