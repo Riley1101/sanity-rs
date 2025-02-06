@@ -429,4 +429,51 @@ mod basic {
             r###"<p><code>code</code><strong>strong</strong><em>em</em><u>underline</u><del>strike-through</del><a href="https://www.sanity.io/">link</a></p>"###
         );
     }
+
+    #[test]
+    fn marks_all_the_way() {
+        let result = r###"
+    {
+  "_type": "block",
+  "_key": "block",
+  "style": "normal",
+  "children": [
+    {
+      "_key": "a1ph4",
+      "_type": "span",
+      "marks": [
+        "mark1",
+        "em",
+        "mark2"
+      ],
+      "text": "Sanity"
+    },
+    {
+      "_key": "b374",
+      "_type": "span",
+      "marks": [
+        "mark2",
+        "mark1",
+        "em"
+      ],
+      "text": " FTW"
+    }
+  ],
+  "markDefs": [
+    {
+      "_key": "mark1",
+      "_type": "highlight",
+      "thickness": "1"
+    },
+    {
+      "_key": "mark2",
+      "_type": "highlight",
+      "thickness": "3"
+    }
+  ]
+}
+    "###;
+        let node = serde_json::from_str::<Node>(result);
+        assert_eq!(node.unwrap().html(), "<p><em>Sanity</em><em> FTW</em></p>");
+    }
 }
