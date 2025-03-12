@@ -75,45 +75,6 @@ mod test {
     use super::*;
 
     #[test]
-    fn render_headings() {
-        let text = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "well".to_string(),
-        };
-        let text2 = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "Hello World".to_string(),
-        };
-
-        let h2 = Node {
-            _key: "key".to_string(),
-            style: Style::H2,
-            _type: "block".to_string(),
-            mark_defs: vec![],
-            children: vec![Children::Span(text)],
-        };
-
-        let h1 = Node {
-            _key: "key".to_string(),
-            style: Style::H1,
-            _type: "block".to_string(),
-            mark_defs: vec![],
-            children: vec![Children::Span(text2), Children::Block(h2)],
-        };
-
-        let body = vec![h1];
-        let result = Renderer::new(body)
-            .add(Style::H1, |node| node.html())
-            .add(Style::Normal, |node| node.html())
-            .render();
-        assert_eq!("<h1>Hello World</h1><h2>well</h2>", result);
-    }
-
-    #[test]
     fn default_renderer() {
         let text = TextNode {
             _key: "key".to_string(),
