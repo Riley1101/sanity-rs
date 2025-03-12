@@ -82,7 +82,6 @@ impl SanityURL {
         let cond_start = query.find("*[").unwrap_or(0) + 2;
         let cond_end = query.find("]").unwrap_or(0);
         let condition = query[cond_start..cond_end].to_string();
-        println!("Condition: {}", condition);
         let mut body = query[cond_end + 1..]
             .to_string()
             .split_whitespace()

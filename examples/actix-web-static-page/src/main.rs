@@ -3,6 +3,7 @@ use dotenv::dotenv;
 use futures::lock::Mutex;
 use sanity_rs::client::SanityClient;
 use sanity_rs::config::SanityConfig;
+use sanity_rs::portabletext::blocks::Node;
 use sanity_rs::create_client;
 use sanity_rs::error::{ConfigurationError, RequestError};
 use sanity_rs::orm::ORM;
@@ -18,25 +19,19 @@ struct QueryResult<T> {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Slug {
-    current: String,
-    _type: String,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
 struct Article {
     title: String,
     description: String,
-    slug: Slug,
+    _id: String,
 }
 
 #[get("/")]
 async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     let query = r###"
         *[_type=="article"][0..2]{
+          _id,
           title,
           description,
-          slug
         }
     "###;
 
@@ -51,37 +46,38 @@ async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     for article in articles {
         response.push_str(&format!("<h2>{}</h2>", article.title));
         response.push_str(&format!("<p>{}</p>", article.description));
-        response.push_str(&format!("<a href=/{}>Read More</a>", article.slug.current));
+        response.push_str(&format!("<a href=/{}>Read More</a>", article._id));
     }
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(response)
 }
 
-#[get("/{slug}")]
+#[get("/{id}")]
 async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>) -> impl Responder {
-    let slug: String = req.match_info().get("slug").unwrap().parse().unwrap();
-    // let query = r###"
-    //     *[_type=="article" && slug.current="some"][0]{
-    //       title,
-    //       slug
-    //     }
-    // "###;
+    let id: String = req.match_info().get("id").unwrap().parse().unwrap();
 
     let mut client = client.lock().await;
+    let v = client
+            .get_by_id(&id)
+            .body("{title,description,_id}")
+            .send()
+            .await.unwrap()
+           .json::<QueryResult<Article>>();
 
-    let string = format!("*[ _type=='article' &&'slug.current'=={}][0]{{
-        title,
-        description,
-        slug
-}}", slug);
+    let article = match v {
+        Ok(res) => res.result,
+        Err(_) => Article {
+            title: "Not Found".to_string(),
+            description: "Article not found".to_string(),
+            _id: "0".to_string(),
+        },
+    };
 
-    let result : Result<QueryResult<Article>, RequestError> = client.query(&string).await.unwrap().json();
-    println!("{:?}", result);
-
+    let response = format!("<h1>{}</h1><p>{}</p>", article.title, article.description);
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(r#"<h1>Article</h1>"#)
+        .body(response)
 }
 
 #[actix_web::main]
