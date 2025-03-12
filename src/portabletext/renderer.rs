@@ -96,6 +96,7 @@ mod test {
             mark_defs: vec![],
             _type: "block".to_string(),
             children: vec![Children::Span(text2)],
+            extra: HashMap::new(),
         };
 
         let paragraph = Node {
@@ -104,6 +105,7 @@ mod test {
             style: Style::Normal,
             _type: "span".to_string(),
             children: vec![Children::Span(text)],
+            extra: HashMap::new(),
         };
 
         let body = vec![paragraph, blockquote];
@@ -131,6 +133,7 @@ mod test {
         };
 
         let blockquote = Node {
+            extra: HashMap::new(),
             mark_defs: vec![],
             _key: "key".to_string(),
             style: Style::Blockquote,
@@ -139,6 +142,7 @@ mod test {
         };
 
         let paragraph = Node {
+            extra: HashMap::new(),
             _key: "key".to_string(),
             mark_defs: vec![],
             style: Style::Normal,
