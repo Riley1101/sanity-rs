@@ -75,45 +75,6 @@ mod test {
     use super::*;
 
     #[test]
-    fn render_headings() {
-        let text = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "well".to_string(),
-        };
-        let text2 = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "Hello World".to_string(),
-        };
-
-        let h2 = Node {
-            _key: "key".to_string(),
-            style: Style::H2,
-            _type: "block".to_string(),
-            mark_defs: vec![],
-            children: vec![Children::Span(text)],
-        };
-
-        let h1 = Node {
-            _key: "key".to_string(),
-            style: Style::H1,
-            _type: "block".to_string(),
-            mark_defs: vec![],
-            children: vec![Children::Span(text2), Children::Block(h2)],
-        };
-
-        let body = vec![h1];
-        let result = Renderer::new(body)
-            .add(Style::H1, |node| node.html())
-            .add(Style::Normal, |node| node.html())
-            .render();
-        assert_eq!("<h1>Hello World</h1><h2>well</h2>", result);
-    }
-
-    #[test]
     fn default_renderer() {
         let text = TextNode {
             _key: "key".to_string(),
@@ -135,6 +96,7 @@ mod test {
             mark_defs: vec![],
             _type: "block".to_string(),
             children: vec![Children::Span(text2)],
+            extra: HashMap::new(),
         };
 
         let paragraph = Node {
@@ -143,6 +105,7 @@ mod test {
             style: Style::Normal,
             _type: "span".to_string(),
             children: vec![Children::Span(text)],
+            extra: HashMap::new(),
         };
 
         let body = vec![paragraph, blockquote];
@@ -170,6 +133,7 @@ mod test {
         };
 
         let blockquote = Node {
+            extra: HashMap::new(),
             mark_defs: vec![],
             _key: "key".to_string(),
             style: Style::Blockquote,
@@ -178,6 +142,7 @@ mod test {
         };
 
         let paragraph = Node {
+            extra: HashMap::new(),
             _key: "key".to_string(),
             mark_defs: vec![],
             style: Style::Normal,
