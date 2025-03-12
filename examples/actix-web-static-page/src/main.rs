@@ -1,13 +1,12 @@
-use actix_web::{get, App, HttpResponse, HttpServer, Responder, web};
-use sanity_rs::config::SanityConfig;
-use sanity_rs::client::SanityClient;
-use sanity_rs::portabletext::blocks::Node;
-use sanity_rs::create_client;
-use sanity_rs::orm::ORM;
-use sanity_rs::error::{ConfigurationError, RequestError};
-use serde::{Deserialize, Serialize};
-use futures::lock::Mutex;
+use actix_web::{get, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
+use futures::lock::Mutex;
+use sanity_rs::client::SanityClient;
+use sanity_rs::config::SanityConfig;
+use sanity_rs::create_client;
+use sanity_rs::error::{ConfigurationError, RequestError};
+use sanity_rs::orm::ORM;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct QueryResult<T> {
@@ -19,30 +18,70 @@ struct QueryResult<T> {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct Record {
-    _id: String,
-    #[serde(rename = "_createdAt")]
-    _created_at: String,
-    body: Node,
+struct Slug {
+    current: String,
+    _type: String,
 }
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Article {
+    title: String,
+    description: String,
+    slug: Slug,
+}
+
 #[get("/")]
-async fn hello(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
-    let query = r#"
-         *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
-           _id,
-           _createdAt,
-           body
-         }
-        "#;
+async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
+    let query = r###"
+        *[_type=="article"][0..2]{
+          title,
+          description,
+          slug
+        }
+    "###;
+
     let mut client = client.lock().await;
-    let value: Result<QueryResult<Vec<Record>>, RequestError> = client.query(query).await.unwrap().json();
-    println!("Value: {:?}", value);
+    let result: Result<QueryResult<Vec<Article>>, RequestError> =
+        client.query(query).await.unwrap().json();
+    let articles = match result {
+        Ok(res) => res.result,
+        Err(_) => vec![],
+    };
+    let mut response = String::new();
+    for article in articles {
+        response.push_str(&format!("<h2>{}</h2>", article.title));
+        response.push_str(&format!("<p>{}</p>", article.description));
+        response.push_str(&format!("<a href=/{}>Read More</a>", article.slug.current));
+    }
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
-        .body(r#"
-            <h1>Actix-web</h1>
-            <p>Hello world!</p>
-        "#)
+        .body(response)
+}
+
+#[get("/{slug}")]
+async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>) -> impl Responder {
+    let slug: String = req.match_info().get("slug").unwrap().parse().unwrap();
+    // let query = r###"
+    //     *[_type=="article" && slug.current="some"][0]{
+    //       title,
+    //       slug
+    //     }
+    // "###;
+
+    let mut client = client.lock().await;
+
+    let string = format!("*[ _type=='article' &&'slug.current'=={}][0]{{
+        title,
+        description,
+        slug
+}}", slug);
+
+    let result : Result<QueryResult<Article>, RequestError> = client.query(&string).await.unwrap().json();
+    println!("{:?}", result);
+
+    HttpResponse::Ok()
+        .content_type("text/html; charset=utf-8")
+        .body(r#"<h1>Article</h1>"#)
 }
 
 #[actix_web::main]
@@ -60,10 +99,10 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(client_ref.clone())
-            .service(hello)
+            .service(home)
+            .service(article_route)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
     .await
 }
-
