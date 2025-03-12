@@ -681,6 +681,78 @@ mod test {
 ]
 "###;
         let node: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(result);
-        println!("{:?}", node.unwrap());
+        assert!(node.is_ok());
+    }
+
+    #[test]
+    fn bullet_list() {
+        let input = r###"
+        [
+  {
+    "style": "normal",
+    "_type": "block",
+    "_key": "f94596b05b41",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "text": "Let's test some of these lists!",
+        "_key": "span",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "bullet",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "937effb1cd06",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Bullet 1",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "bullet",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "bd2d22278b88",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Bullet 2",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "bullet",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "a97d32e9f747",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Bullet 3",
+        "marks": []
+      }
+    ]
+  }
+]
+        "###;
+        let node: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(input);
+        assert!(node.is_ok());
     }
 }
