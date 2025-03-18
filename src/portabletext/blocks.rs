@@ -1,6 +1,6 @@
-#![allow(dead_code)]
 use serde::ser::SerializeStruct;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 use std::fmt::Display;
@@ -48,7 +48,6 @@ pub enum Children {
     Span(TextNode),
     #[serde(alias = "block")]
     Block(Node),
-
     #[serde(alias = "code")]
     Code(CodeNode),
 }
@@ -108,6 +107,7 @@ impl Mark {
         };
         Self { _type }
     }
+
     pub fn render(&self, mark_def: &MarkDefs) -> MarkResult {
         let extra = &mark_def.extra;
         match self._type {
@@ -156,15 +156,16 @@ pub struct MarkDefs {
     pub extra: HashMap<String, String>,
 }
 
-#[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Node {
     pub _key: String,
     pub _type: String,
     pub children: Vec<Children>,
+    pub style: Style,
     #[serde(alias = "markDefs")]
     pub mark_defs: Vec<MarkDefs>,
-    pub style: Style,
+    #[serde(flatten)]
+    pub extra: HashMap<String, Value>,
 }
 
 pub trait Render {
@@ -609,5 +610,149 @@ mod test {
         "###;
         let deserialized: Result<CodeNode, serde_json::Error> = serde_json::from_str(result);
         assert!(deserialized.is_ok());
+    }
+
+    #[test]
+    fn list_node() {
+        let result = r###"
+[
+  {
+    "style": "normal",
+    "_type": "block",
+    "_key": "f94596b05b41",
+    "markDefs": [],
+    "children": [
+      {
+        "_key": "span",
+        "_type": "span",
+        "text": "Let's test some of these lists!",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "number",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "937effb1cd06",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Number 1",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "number",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "bd2d22278b88",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Number 2",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "number",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "a97d32e9f747",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Number 3",
+        "marks": []
+      }
+    ]
+  }
+]
+"###;
+        let node: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(result);
+        assert!(node.is_ok());
+    }
+
+    #[test]
+    fn bullet_list() {
+        let input = r###"
+        [
+  {
+    "style": "normal",
+    "_type": "block",
+    "_key": "f94596b05b41",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "text": "Let's test some of these lists!",
+        "_key": "span",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "bullet",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "937effb1cd06",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Bullet 1",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "bullet",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "bd2d22278b88",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Bullet 2",
+        "marks": []
+      }
+    ]
+  },
+  {
+    "listItem": "bullet",
+    "style": "normal",
+    "level": 1,
+    "_type": "block",
+    "_key": "a97d32e9f747",
+    "markDefs": [],
+    "children": [
+      {
+        "_type": "span",
+        "_key": "span",
+        "text": "Bullet 3",
+        "marks": []
+      }
+    ]
+  }
+]
+        "###;
+        let node: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(input);
+        assert!(node.is_ok());
     }
 }
