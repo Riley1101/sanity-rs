@@ -20,7 +20,13 @@ fn default_callback(node: &Node) -> String {
         Style::Normal => "p",
         Style::Blockquote => "blockquote",
     };
-    for child in &node.children {
+
+    let children = match &node.children {
+        Some(children) => children,
+        None => return result,
+    };
+
+    for child in children {
         match child {
             Children::Span(text) => {
                 result.push_str(&format!("<{}>{}</{}>", tag, text.text, tag));
@@ -31,6 +37,7 @@ fn default_callback(node: &Node) -> String {
             Children::Code(node) => {
                 result.push_str(&node.html());
             }
+            Children::Unknown(_) => println!("unknown field"),
         }
     }
     result
@@ -95,7 +102,7 @@ mod test {
             style: Style::Blockquote,
             mark_defs: vec![],
             _type: "block".to_string(),
-            children: vec![Children::Span(text2)],
+            children: Some(vec![Children::Span(text2)]),
             extra: HashMap::new(),
         };
 
@@ -104,7 +111,7 @@ mod test {
             mark_defs: vec![],
             style: Style::Normal,
             _type: "span".to_string(),
-            children: vec![Children::Span(text)],
+            children: Some(vec![Children::Span(text)]),
             extra: HashMap::new(),
         };
 
@@ -138,7 +145,7 @@ mod test {
             _key: "key".to_string(),
             style: Style::Blockquote,
             _type: "block".to_string(),
-            children: vec![Children::Span(text2)],
+            children: Some(vec![Children::Span(text2)]),
         };
 
         let paragraph = Node {
@@ -147,7 +154,7 @@ mod test {
             mark_defs: vec![],
             style: Style::Normal,
             _type: "block".to_string(),
-            children: vec![Children::Span(text)],
+            children: Some(vec![Children::Span(text)]),
         };
 
         let body = vec![paragraph, blockquote];

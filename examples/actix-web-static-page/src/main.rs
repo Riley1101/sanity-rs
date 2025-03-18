@@ -53,6 +53,14 @@ async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
         .body(response)
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct ArticleWithBody {
+    title: String,
+    description: String,
+    _id: String,
+    body: Option<Vec<Node>>,
+}
+
 #[get("/{id}")]
 async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     let id: String = req.match_info().get("id").unwrap().parse().unwrap();
@@ -63,16 +71,21 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
             .body("{title,description,_id}")
             .send()
             .await.unwrap()
-           .json::<QueryResult<Article>>();
+           .json::<QueryResult<ArticleWithBody>>();
+    println!("===========================================");
+    println!("{:?}",v);
 
     let article = match v {
         Ok(res) => res.result,
-        Err(_) => Article {
+        Err(_) => ArticleWithBody {
             title: "Not Found".to_string(),
             description: "Article not found".to_string(),
             _id: "0".to_string(),
+            body: Some(vec![]),
         },
     };
+
+    println!("{:?}",article);
 
     let response = format!("<h1>{}</h1><p>{}</p>", article.title, article.description);
     HttpResponse::Ok()
