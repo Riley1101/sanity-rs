@@ -4,7 +4,7 @@ use futures::lock::Mutex;
 use sanity_rs::client::SanityClient;
 use sanity_rs::config::SanityConfig;
 use sanity_rs::portabletext::blocks::Node;
-use sanity_rs::create_client;
+use sanity_rs::client::create_client;
 use sanity_rs::error::{ConfigurationError, RequestError};
 use sanity_rs::orm::ORM;
 use serde::{Deserialize, Serialize};
