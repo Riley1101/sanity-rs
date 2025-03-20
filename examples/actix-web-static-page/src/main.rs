@@ -53,6 +53,14 @@ async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
         .body(response)
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct ArticleWithBody {
+    title: String,
+    description: String,
+    _id: String,
+    body: Option<Vec<Node>>,
+}
+
 #[get("/{id}")]
 async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     let id: String = req.match_info().get("id").unwrap().parse().unwrap();

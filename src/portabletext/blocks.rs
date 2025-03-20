@@ -50,6 +50,8 @@ pub enum Children {
     Block(Node),
     #[serde(alias = "code")]
     Code(CodeNode),
+    #[serde(untagged)]
+    Unknown(String),
 }
 
 impl Serialize for Children {
@@ -69,6 +71,7 @@ impl Serialize for Children {
                 state.serialize_field("code", &code.code)?;
                 state.serialize_field("language", &code.language)?;
             }
+            Children::Unknown(_) => println!("Unknown field"),
         }
         state.end()
     }
@@ -160,7 +163,7 @@ pub struct MarkDefs {
 pub struct Node {
     pub _key: String,
     pub _type: String,
-    pub children: Vec<Children>,
+    pub children: Option<Vec<Children>>,
     pub style: Style,
     #[serde(alias = "markDefs")]
     pub mark_defs: Vec<MarkDefs>,
@@ -184,7 +187,12 @@ impl Render for Node {
             Style::Normal => "p",
             Style::Blockquote => "blockquote",
         };
-        for child in &self.children {
+        let children = match &self.children {
+            Some(children) => children,
+            None => return String::new(),
+        };
+
+        for child in children {
             let mark_defs = &self.mark_defs;
             match child {
                 Children::Span(text) => {
@@ -218,6 +226,9 @@ impl Render for Node {
                         "<pre><code class=\"language-{}\">{}</code></pre>",
                         code.language, code.code
                     ));
+                }
+                Children::Unknown(_) => {
+                    println!("Unknown field");
                 }
             }
         }
@@ -293,7 +304,11 @@ mod test {
 "###;
 
         let deserialized: Node = serde_json::from_str(result).unwrap();
-        deserialized.children.iter().for_each(|child| {
+        let children = match deserialized.children {
+            Some(children) => children,
+            None => vec![],
+        };
+        children.iter().for_each(|child| {
             if let Children::Span(text) = child {
                 assert_eq!(text.text, "lorem is cool and i love it");
             }
