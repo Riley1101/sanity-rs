@@ -164,9 +164,9 @@ pub struct Node {
     pub _key: String,
     pub _type: String,
     pub children: Option<Vec<Children>>,
-    pub style: Style,
+    pub style: Option<Style>,
     #[serde(alias = "markDefs")]
-    pub mark_defs: Vec<MarkDefs>,
+    pub mark_defs: Option<Vec<MarkDefs>>,
     #[serde(flatten)]
     pub extra: HashMap<String, Value>,
 }
@@ -178,15 +178,20 @@ pub trait Render {
 impl Render for Node {
     fn html(&self) -> String {
         let mut result = String::new();
+
         let tag = match &self.style {
-            Style::H1 => "h1",
-            Style::H2 => "h2",
-            Style::H3 => "h3",
-            Style::H4 => "h4",
-            Style::H5 => "h5",
-            Style::Normal => "p",
-            Style::Blockquote => "blockquote",
+            Some(style) => match style {
+                Style::H1 => "h1",
+                Style::H2 => "h2",
+                Style::H3 => "h3",
+                Style::H4 => "h4",
+                Style::H5 => "h5",
+                Style::Normal => "p",
+                Style::Blockquote => "blockquote",
+            },
+            None => return String::new(),
         };
+
         let children = match &self.children {
             Some(children) => children,
             None => return String::new(),
@@ -194,6 +199,11 @@ impl Render for Node {
 
         for child in children {
             let mark_defs = &self.mark_defs;
+            let mark_defs = match mark_defs {
+                Some(mark_defs) => mark_defs,
+                None => &Vec::new(),
+            };
+            println!("{:?}", child);
             match child {
                 Children::Span(text) => {
                     let mut marks_clone = text.marks.clone();

@@ -12,13 +12,16 @@ pub struct Renderer {
 fn default_callback(node: &Node) -> String {
     let mut result = String::from("");
     let tag = match &node.style {
-        Style::H1 => "h1",
-        Style::H2 => "h2",
-        Style::H3 => "h3",
-        Style::H4 => "h4",
-        Style::H5 => "h5",
-        Style::Normal => "p",
-        Style::Blockquote => "blockquote",
+        Some(style) => match style {
+            Style::H1 => "h1",
+            Style::H2 => "h2",
+            Style::H3 => "h3",
+            Style::H4 => "h4",
+            Style::H5 => "h5",
+            Style::Normal => "p",
+            Style::Blockquote => "blockquote",
+        },
+        None => "p",
     };
 
     let children = match &node.children {
@@ -60,7 +63,11 @@ impl Renderer {
         let mut result = String::from("");
 
         for node in &self.input {
-            let callback = self.config.get(&node.style);
+            let style = match &node.style {
+                Some(style) => style,
+                None => &Style::Normal,
+            };
+            let callback = self.config.get(style);
             let callback = match callback {
                 Some(callback) => callback,
                 None => {
@@ -99,8 +106,8 @@ mod test {
 
         let blockquote = Node {
             _key: "key".to_string(),
-            style: Style::Blockquote,
-            mark_defs: vec![],
+            style: Some(Style::Blockquote),
+            mark_defs: Some(vec![]),
             _type: "block".to_string(),
             children: Some(vec![Children::Span(text2)]),
             extra: HashMap::new(),
@@ -108,8 +115,8 @@ mod test {
 
         let paragraph = Node {
             _key: "key".to_string(),
-            mark_defs: vec![],
-            style: Style::Normal,
+            mark_defs: Some(vec![]),
+            style: Some(Style::Normal),
             _type: "span".to_string(),
             children: Some(vec![Children::Span(text)]),
             extra: HashMap::new(),
@@ -141,9 +148,9 @@ mod test {
 
         let blockquote = Node {
             extra: HashMap::new(),
-            mark_defs: vec![],
+            mark_defs: Some(vec![]),
             _key: "key".to_string(),
-            style: Style::Blockquote,
+            style: Some(Style::Blockquote),
             _type: "block".to_string(),
             children: Some(vec![Children::Span(text2)]),
         };
@@ -151,8 +158,8 @@ mod test {
         let paragraph = Node {
             extra: HashMap::new(),
             _key: "key".to_string(),
-            mark_defs: vec![],
-            style: Style::Normal,
+            mark_defs: Some(vec![]),
+            style: Some(Style::Normal),
             _type: "block".to_string(),
             children: Some(vec![Children::Span(text)]),
         };
