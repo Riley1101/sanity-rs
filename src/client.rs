@@ -70,7 +70,6 @@ impl SanityClient {
     ///
     /// builder method for setting query body for later usecases.
     pub fn body(&mut self, body: &str) -> &mut Self {
-        println!("{}",body);
         self.payload.set_body(body);
         self
     }
