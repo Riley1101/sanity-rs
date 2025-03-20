@@ -71,21 +71,16 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
             .body("{title,description,_id}")
             .send()
             .await.unwrap()
-           .json::<QueryResult<ArticleWithBody>>();
-    println!("===========================================");
-    println!("{:?}",v);
+           .json::<QueryResult<Article>>();
 
     let article = match v {
         Ok(res) => res.result,
-        Err(_) => ArticleWithBody {
+        Err(_) => Article {
             title: "Not Found".to_string(),
             description: "Article not found".to_string(),
             _id: "0".to_string(),
-            body: Some(vec![]),
         },
     };
-
-    println!("{:?}",article);
 
     let response = format!("<h1>{}</h1><p>{}</p>", article.title, article.description);
     HttpResponse::Ok()
