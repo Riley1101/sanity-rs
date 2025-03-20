@@ -3,16 +3,20 @@ use crate::{
     error::{RequestError, URLError},
     url::SanityURL,
 };
-
 use reqwest::Client as ReqwestClient;
 use std::fmt::Display;
 use url::Url;
 
-#[allow(dead_code)]
+pub fn create_client(config: SanityConfig) -> SanityClient {
+    match SanityClient::new(config) {
+        Ok(client) => client,
+        Err(e) => panic!("Error creating client: {:?}", e),
+    }
+}
+
+
 pub struct RequestPayload {
-    /// Root url without the query body
     pub query: Url,
-    /// Groq body
     pub body: Option<String>,
     pub query_result: Option<String>,
 }
@@ -36,7 +40,6 @@ impl RequestPayload {
     }
 }
 
-#[allow(dead_code)]
 pub struct SanityClient {
     config: SanityConfig,
     pub client: ReqwestClient,
