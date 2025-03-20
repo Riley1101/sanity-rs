@@ -57,6 +57,7 @@ impl SanityClient {
             })
             .use_cdn(config.use_cdn)
             .project_id(&config.project_id)
+            .api_version(&config.api_version)
             .dataset(&config.dataset)
             .build()
             .map_err(RequestError::URLParsingError)?;

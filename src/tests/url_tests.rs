@@ -8,7 +8,7 @@ mod test {
         let sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"production".to_string())
-            .api_version(&"v2022-03-07".to_string())
+            .api_version(&Some("v2022-03-07".to_string()))
             .host("api.sanity.io".to_string())
             .build()
             .unwrap();
@@ -31,7 +31,7 @@ mod test {
         let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"production".to_string())
-            .api_version(&"v2022-03-07".to_string())
+            .api_version(&Some("v2022-03-07".to_string()))
             .host("api.sanity.io".to_string())
             .build()?;
         SanityURL::query(&mut sanity_url, query);
@@ -52,14 +52,14 @@ mod test {
         }"#;
         let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
+            .api_version(&Some("v2022-03-07".to_string()))
             .dataset(&"blog".to_string())
-            .api_version(&"v2023-01-01".to_string())
             .host("api.sanity.io".to_string())
             .build()?;
         SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-                "https://abc123.api.sanity.io/v2023-01-01/data/query/blog?query=*[type%20==%20%22post%22%20&&%20published%20==%20true]{title,author,categories[]-%3Etitle}"
+              "https://abc123.api.sanity.io/v2022-03-07/data/query/blog?query=*[type%20==%20%22post%22%20&&%20published%20==%20true]{title,author,categories[]-%3Etitle}"
         );
         Ok(())
     }
@@ -69,13 +69,13 @@ mod test {
         let mut sanity_url = SanityURL::new()
             .project_id(&"xyz456".to_string())
             .dataset(&"test".to_string())
-            .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
+            .api_version(&Some("v2022-03-07".to_string()))
             .build()?;
         SanityURL::query(&mut sanity_url, "");
         assert_eq!(
             sanity_url.as_str(),
-            "https://xyz456.api.sanity.io/v2023-05-01/data/query/test"
+            "https://xyz456.api.sanity.io/v2022-03-07/data/query/test"
         );
         Ok(())
     }
@@ -90,13 +90,13 @@ mod test {
         let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"store".to_string())
-            .api_version(&"v2023-05-01".to_string())
+            .api_version(&Some("v2022-03-07".to_string()))
             .host("api.sanity.io".to_string())
             .build()?;
         SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-             "https://abc123.api.sanity.io/v2023-05-01/data/query/store?query=*[name%20==%20%22O%27Reilly%22%20&&%20price%20%3C%20100.0]{name,price}",
+            "https://abc123.api.sanity.io/v2022-03-07/data/query/store?query=*[name%20==%20%22O%27Reilly%22%20&&%20price%20%3C%20100.0]{name,price}"
         );
         Ok(())
     }
@@ -107,13 +107,13 @@ mod test {
         let mut sanity_url = SanityURL::new()
             .project_id(&"abc123".to_string())
             .dataset(&"blog".to_string())
-            .api_version(&"v2023-05-01".to_string())
             .host("api.sanity.io".to_string())
+            .api_version(&Some("v2022-03-07".to_string()))
             .build()?;
         SanityURL::query(&mut sanity_url, query);
         assert_eq!(
             sanity_url.as_str(),
-            "https://abc123.api.sanity.io/v2023-05-01/data/query/blog?query=*[_type%20==%20%22post%22]{title,author}"
+            "https://abc123.api.sanity.io/v2022-03-07/data/query/blog?query=*[_type%20==%20%22post%22]{title,author}"
         );
         Ok(())
     }

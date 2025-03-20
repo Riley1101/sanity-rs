@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use crate::error::URLError;
 use std::fmt::Display;
 use url::Url;
@@ -26,7 +25,11 @@ impl SanityURL {
         self
     }
 
-    pub fn api_version(&mut self, api_version: &String) -> &mut Self {
+    pub fn api_version(&mut self, api_version: &Option<String>) -> &mut Self {
+        let api_version = match api_version {
+            Some(version) => version,
+            None => &"v2022-03-07".to_string(),
+        };
         self.api_version = api_version.to_string();
         self
     }
