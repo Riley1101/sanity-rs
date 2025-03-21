@@ -36,12 +36,15 @@ async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     "###;
 
     let mut client = client.lock().await;
+
     let result: Result<QueryResult<Vec<Article>>, RequestError> =
         client.query(query).await.unwrap().json();
+
     let articles = match result {
         Ok(res) => res.result,
         Err(_) => vec![],
     };
+
     let mut response = String::new();
     for article in articles {
         response.push_str(&format!("<h2>{}</h2>", article.title));
@@ -93,9 +96,6 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
     let body = body
         .iter()
         .map(|node|  {
-            println!("===================================");
-            println!("{:?}", node);
-            println!("===================================");
            return  node.html()
         })
         .collect::<Vec<String>>()

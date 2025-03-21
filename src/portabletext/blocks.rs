@@ -203,7 +203,6 @@ impl Render for Node {
                 Some(mark_defs) => mark_defs,
                 None => &Vec::new(),
             };
-            println!("{:?}", child);
             match child {
                 Children::Span(text) => {
                     let mut marks_clone = text.marks.clone();
