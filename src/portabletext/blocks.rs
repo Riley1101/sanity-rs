@@ -171,6 +171,7 @@ pub struct Node {
     pub extra: HashMap<String, Value>,
 }
 
+
 pub trait Render {
     fn html(&self) -> String;
 }

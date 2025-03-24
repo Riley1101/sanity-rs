@@ -1,11 +1,12 @@
 use std::collections::HashMap;
 
 use super::blocks::{Children, Node, Render, Style};
+use super::PortableText;
 
 type Callback = fn(&Node) -> String;
 
-pub struct Renderer {
-    input: Vec<Node>,
+pub struct ToHTML {
+    input: PortableText,
     config: HashMap<Style, Callback>,
 }
 
@@ -46,9 +47,9 @@ fn default_callback(node: &Node) -> String {
     result
 }
 
-impl Renderer {
-    pub fn new(input: Vec<Node>) -> Self {
-        Renderer {
+impl ToHTML {
+    pub fn new(input: PortableText) -> Self {
+        ToHTML {
             input,
             config: HashMap::new(),
         }
@@ -62,7 +63,7 @@ impl Renderer {
     pub fn render(&mut self) -> String {
         let mut result = String::from("");
 
-        for node in &self.input {
+        for node in &self.input.nodes {
             let style = match &node.style {
                 Some(style) => style,
                 None => &Style::Normal,
@@ -122,8 +123,8 @@ mod test {
             extra: HashMap::new(),
         };
 
-        let body = vec![paragraph, blockquote];
-        let result = Renderer::new(body).render();
+        let body = PortableText::new(vec![paragraph, blockquote]);
+        let result = ToHTML::new(body).render();
         assert_eq!(
             "<p>lorem is cool and i love it</p><blockquote>this is a quote</blockquote>",
             result
@@ -164,8 +165,8 @@ mod test {
             children: Some(vec![Children::Span(text)]),
         };
 
-        let body = vec![paragraph, blockquote];
-        let result = Renderer::new(body)
+        let body = PortableText::new(vec![paragraph, blockquote]);
+        let result = ToHTML::new(body)
             .add(Style::H1, |node| node.html())
             .add(Style::Normal, |node| node.html())
             .add(Style::Blockquote, |node| node.html())
