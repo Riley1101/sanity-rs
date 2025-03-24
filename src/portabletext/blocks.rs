@@ -47,7 +47,7 @@ pub enum Children {
     #[serde(alias = "span")]
     Span(TextNode),
     #[serde(alias = "block")]
-    Block(Node),
+    Block(PortableTextNode),
     #[serde(alias = "code")]
     Code(CodeNode),
     #[serde(untagged)]
@@ -160,7 +160,7 @@ pub struct MarkDefs {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Node {
+pub struct PortableTextNode {
     pub _key: String,
     pub _type: String,
     pub children: Option<Vec<Children>>,
@@ -171,12 +171,11 @@ pub struct Node {
     pub extra: HashMap<String, Value>,
 }
 
-
 pub trait Render {
     fn html(&self) -> String;
 }
 
-impl Render for Node {
+impl Render for PortableTextNode {
     fn html(&self) -> String {
         let mut result = String::new();
 
@@ -247,7 +246,7 @@ impl Render for Node {
     }
 }
 
-impl Display for Node {
+impl Display for PortableTextNode {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self.style)
     }
@@ -313,7 +312,7 @@ mod test {
 }
 "###;
 
-        let deserialized: Node = serde_json::from_str(result).unwrap();
+        let deserialized: PortableTextNode = serde_json::from_str(result).unwrap();
         let children = match deserialized.children {
             Some(children) => children,
             None => vec![],
@@ -401,7 +400,7 @@ mod test {
     }
        ]
     "###;
-        let deserialized: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(result);
+        let deserialized: Result<Vec<PortableTextNode>, serde_json::Error> = serde_json::from_str(result);
         assert!(deserialized.is_ok());
     }
 
@@ -452,7 +451,7 @@ mod test {
 }
 "###;
 
-        let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(result);
+        let deserialized: Result<PortableTextNode, serde_json::Error> = serde_json::from_str(result);
         assert!(deserialized.is_ok());
     }
 
@@ -483,7 +482,7 @@ mod test {
           }
         "###;
 
-        let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(mark_defs_content);
+        let deserialized: Result<PortableTextNode, serde_json::Error> = serde_json::from_str(mark_defs_content);
         assert!(deserialized.is_ok());
     }
 
@@ -535,7 +534,7 @@ mod test {
             "style": "normal"
           }
     "###;
-        let deserialized: Result<Node, serde_json::Error> = serde_json::from_str(query);
+        let deserialized: Result<PortableTextNode, serde_json::Error> = serde_json::from_str(query);
         assert!(deserialized.is_ok());
     }
 
@@ -619,7 +618,7 @@ mod test {
     }
   ]
         "###;
-        let deserialized: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(query);
+        let deserialized: Result<Vec<PortableTextNode>, serde_json::Error> = serde_json::from_str(query);
         assert!(deserialized.is_ok());
     }
 
@@ -705,7 +704,7 @@ mod test {
   }
 ]
 "###;
-        let node: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(result);
+        let node: Result<Vec<PortableTextNode>, serde_json::Error> = serde_json::from_str(result);
         assert!(node.is_ok());
     }
 
@@ -777,7 +776,7 @@ mod test {
   }
 ]
         "###;
-        let node: Result<Vec<Node>, serde_json::Error> = serde_json::from_str(input);
+        let node: Result<Vec<PortableTextNode>, serde_json::Error> = serde_json::from_str(input);
         assert!(node.is_ok());
     }
 }

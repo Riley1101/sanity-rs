@@ -1,16 +1,15 @@
 use std::collections::HashMap;
 
-use super::blocks::{Children, Node, Render, Style};
-use super::PortableText;
+use super::blocks::{Children, PortableTextNode, Render, Style};
 
-type Callback = fn(&Node) -> String;
+type Callback = fn(&PortableTextNode) -> String;
 
 pub struct ToHTML {
-    input: PortableText,
+    input: Vec<PortableTextNode>,
     config: HashMap<Style, Callback>,
 }
 
-fn default_callback(node: &Node) -> String {
+fn default_callback(node: &PortableTextNode) -> String {
     let mut result = String::from("");
     let tag = match &node.style {
         Some(style) => match style {
@@ -48,7 +47,7 @@ fn default_callback(node: &Node) -> String {
 }
 
 impl ToHTML {
-    pub fn new(input: PortableText) -> Self {
+    pub fn new(input: Vec<PortableTextNode>) -> Self {
         ToHTML {
             input,
             config: HashMap::new(),
@@ -63,7 +62,7 @@ impl ToHTML {
     pub fn render(&mut self) -> String {
         let mut result = String::from("");
 
-        for node in &self.input.nodes {
+        for node in &self.input {
             let style = match &node.style {
                 Some(style) => style,
                 None => &Style::Normal,
@@ -105,7 +104,7 @@ mod test {
             text: "this is a quote".to_string(),
         };
 
-        let blockquote = Node {
+        let blockquote = PortableTextNode {
             _key: "key".to_string(),
             style: Some(Style::Blockquote),
             mark_defs: Some(vec![]),
@@ -114,7 +113,7 @@ mod test {
             extra: HashMap::new(),
         };
 
-        let paragraph = Node {
+        let paragraph = PortableTextNode {
             _key: "key".to_string(),
             mark_defs: Some(vec![]),
             style: Some(Style::Normal),
@@ -123,7 +122,7 @@ mod test {
             extra: HashMap::new(),
         };
 
-        let body = PortableText::new(vec![paragraph, blockquote]);
+        let body = vec![paragraph, blockquote];
         let result = ToHTML::new(body).render();
         assert_eq!(
             "<p>lorem is cool and i love it</p><blockquote>this is a quote</blockquote>",
@@ -147,7 +146,7 @@ mod test {
             text: "this is a quote".to_string(),
         };
 
-        let blockquote = Node {
+        let blockquote = PortableTextNode {
             extra: HashMap::new(),
             mark_defs: Some(vec![]),
             _key: "key".to_string(),
@@ -156,7 +155,7 @@ mod test {
             children: Some(vec![Children::Span(text2)]),
         };
 
-        let paragraph = Node {
+        let paragraph = PortableTextNode {
             extra: HashMap::new(),
             _key: "key".to_string(),
             mark_defs: Some(vec![]),
@@ -165,7 +164,7 @@ mod test {
             children: Some(vec![Children::Span(text)]),
         };
 
-        let body = PortableText::new(vec![paragraph, blockquote]);
+        let body = vec![paragraph, blockquote];
         let result = ToHTML::new(body)
             .add(Style::H1, |node| node.html())
             .add(Style::Normal, |node| node.html())
