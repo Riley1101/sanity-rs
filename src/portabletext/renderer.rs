@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::blocks::{Children, PortableTextNode, Render, Style};
+use super::blocks::{Children, PortableTextNode, HTML, Style};
 
 type Callback = fn(&PortableTextNode) -> String;
 

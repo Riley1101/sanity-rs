@@ -32,7 +32,7 @@ pub struct CodeNode {
     language: String,
 }
 
-impl Render for CodeNode {
+impl HTML for CodeNode {
     fn html(&self) -> String {
         format!(
             "<pre><code class=\"language-{}\">{}</code></pre>",
@@ -171,11 +171,11 @@ pub struct PortableTextNode {
     pub extra: HashMap<String, Value>,
 }
 
-pub trait Render {
+pub trait HTML {
     fn html(&self) -> String;
 }
 
-impl Render for PortableTextNode {
+impl HTML for PortableTextNode {
     fn html(&self) -> String {
         let mut result = String::new();
 
@@ -400,7 +400,8 @@ mod test {
     }
        ]
     "###;
-        let deserialized: Result<Vec<PortableTextNode>, serde_json::Error> = serde_json::from_str(result);
+        let deserialized: Result<Vec<PortableTextNode>, serde_json::Error> =
+            serde_json::from_str(result);
         assert!(deserialized.is_ok());
     }
 
@@ -451,7 +452,8 @@ mod test {
 }
 "###;
 
-        let deserialized: Result<PortableTextNode, serde_json::Error> = serde_json::from_str(result);
+        let deserialized: Result<PortableTextNode, serde_json::Error> =
+            serde_json::from_str(result);
         assert!(deserialized.is_ok());
     }
 
@@ -482,7 +484,8 @@ mod test {
           }
         "###;
 
-        let deserialized: Result<PortableTextNode, serde_json::Error> = serde_json::from_str(mark_defs_content);
+        let deserialized: Result<PortableTextNode, serde_json::Error> =
+            serde_json::from_str(mark_defs_content);
         assert!(deserialized.is_ok());
     }
 
@@ -618,7 +621,8 @@ mod test {
     }
   ]
         "###;
-        let deserialized: Result<Vec<PortableTextNode>, serde_json::Error> = serde_json::from_str(query);
+        let deserialized: Result<Vec<PortableTextNode>, serde_json::Error> =
+            serde_json::from_str(query);
         assert!(deserialized.is_ok());
     }
 

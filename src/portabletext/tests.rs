@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod basic {
-    use crate::portabletext::blocks::{PortableTextNode, Render};
+    use crate::portabletext::blocks::{PortableTextNode, HTML};
     use serde_json;
 
     #[test]

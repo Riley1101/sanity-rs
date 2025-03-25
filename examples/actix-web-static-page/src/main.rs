@@ -6,9 +6,7 @@ use sanity_rs::client::SanityClient;
 use sanity_rs::config::SanityConfig;
 use sanity_rs::error::{ConfigurationError, RequestError};
 use sanity_rs::orm::ORM;
-use sanity_rs::portabletext::blocks::{Node, Render};
-use sanity_rs::portabletext::renderer::ToHTML;
-use sanity_rs::portabletext::PortableText;
+use sanity_rs::portabletext::blocks::{PortableTextNode, HTML};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -64,7 +62,7 @@ struct ArticleWithBody {
     title: String,
     description: String,
     _id: String,
-    body: Option<PortableText>,
+    body: Option<Vec<PortableTextNode>>,
 }
 
 #[get("/{id}")]
@@ -83,33 +81,26 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
 
     let article = match v {
         Ok(res) => res.result,
-        Err(e) => {
-            println!("{}", e.to_string());
-            ArticleWithBody {
+        Err(_e) => ArticleWithBody {
             title: "Not Found".to_string(),
             description: "Article not found".to_string(),
             body: None,
             _id: "0".to_string(),
-        }},
+        },
     };
 
     let body = match article.body {
         Some(body) => body,
-        None => PortableText { nodes: vec![] },
+        None => vec![],
     };
-    println!("Hello world");
-    println!("{:?}", body);
 
-    let body = body.nodes
+    let body = body
         .iter()
         .map(|node|  {
            return  node.html()
         })
         .collect::<Vec<String>>()
         .join("");
-
-    println!("{:?}", body);
-
 
     let response = format!(
         "<h1>{title}</h1><p>{description}</p><hr>{result}",
