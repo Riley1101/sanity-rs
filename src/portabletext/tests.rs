@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod basic {
-    use crate::portabletext::blocks::{Node, Render};
+    use crate::portabletext::blocks::{PortableTextNode, HTML};
     use serde_json;
 
     #[test]
@@ -14,7 +14,7 @@ mod basic {
   "style": "normal"
 }
         "#;
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(node.unwrap().html(), "<p></p>");
     }
 
@@ -36,7 +36,7 @@ mod basic {
   "style": "normal"
 }
     "#;
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(node.unwrap().html(), "<p>Plain text.</p>");
     }
 
@@ -65,7 +65,7 @@ mod basic {
 }
     "#;
 
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             "<p>Span number one. And span number two.</p>"
@@ -98,7 +98,7 @@ mod basic {
   "style": "normal"
 }
     "#;
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             "<p><code>sanity</code> is the name of the CLI tool.</p>"
@@ -139,7 +139,7 @@ mod basic {
   "style": "normal"
 }        
 "#;
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             "<p><strong>A word of</strong><strong> warning;</strong> Sanity is addictive.</p>"
@@ -181,7 +181,7 @@ mod basic {
   "style": "normal"
 }
         "#;
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             "<p><strong>A word of </strong><strong><em>warning;</em></strong> Sanity is addictive.</p>"
@@ -227,7 +227,7 @@ mod basic {
 }
       "#;
 
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             "<p>A word of warning; <a href=\"https://sanity.io/\">Sanity</a> is addictive.</p>"
@@ -252,7 +252,7 @@ mod basic {
   "style": "h2"
 }
         "###;
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(node.unwrap().html(), "<h2>Dat heading</h2>");
     }
 
@@ -313,7 +313,7 @@ mod basic {
       "style": "blockquote"
     }
     "###;
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             r###"<blockquote><a href="https://sanity.io/">Sanity</a> can be used to power almost any <a href="https://sanity.io/"><strong><em>app</em></strong></a><em><a href="https://sanity.io/"> or website</a></em>.</blockquote>"###
@@ -349,7 +349,7 @@ mod basic {
 }
    "###;
 
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             r###"<p><a href="https://apple.com"><code><strong>Hello</strong></code></a></p>"###
@@ -423,7 +423,7 @@ mod basic {
 }
     "###;
 
-        let node = serde_json::from_str::<Node>(input);
+        let node = serde_json::from_str::<PortableTextNode>(input);
         assert_eq!(
             node.unwrap().html(),
             r###"<p><code>code</code><strong>strong</strong><em>em</em><u>underline</u><del>strike-through</del><a href="https://www.sanity.io/">link</a></p>"###
@@ -473,7 +473,7 @@ mod basic {
   ]
 }
     "###;
-        let node = serde_json::from_str::<Node>(result);
+        let node = serde_json::from_str::<PortableTextNode>(result);
         assert_eq!(node.unwrap().html(), "<p><em>Sanity</em><em> FTW</em></p>");
     }
 }

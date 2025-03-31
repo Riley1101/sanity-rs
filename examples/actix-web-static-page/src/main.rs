@@ -1,12 +1,12 @@
 use actix_web::{get, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use futures::lock::Mutex;
+use sanity_rs::client::create_client;
 use sanity_rs::client::SanityClient;
 use sanity_rs::config::SanityConfig;
-use sanity_rs::portabletext::blocks::Node;
-use sanity_rs::create_client;
 use sanity_rs::error::{ConfigurationError, RequestError};
 use sanity_rs::orm::ORM;
+use sanity_rs::portabletext::blocks::{PortableTextNode, HTML};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -28,7 +28,7 @@ struct Article {
 #[get("/")]
 async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     let query = r###"
-        *[_type=="article"][0..2]{
+        *[_type=="post"][0..2]{
           _id,
           title,
           description,
@@ -36,21 +36,33 @@ async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
     "###;
 
     let mut client = client.lock().await;
+
     let result: Result<QueryResult<Vec<Article>>, RequestError> =
         client.query(query).await.unwrap().json();
+
     let articles = match result {
         Ok(res) => res.result,
         Err(_) => vec![],
     };
+
     let mut response = String::new();
     for article in articles {
         response.push_str(&format!("<h2>{}</h2>", article.title));
         response.push_str(&format!("<p>{}</p>", article.description));
         response.push_str(&format!("<a href=/{}>Read More</a>", article._id));
     }
+
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(response)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct ArticleWithBody {
+    title: String,
+    description: String,
+    _id: String,
+    body: Option<Vec<PortableTextNode>>,
 }
 
 #[get("/{id}")]
@@ -59,22 +71,44 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
 
     let mut client = client.lock().await;
     let v = client
-            .get_by_id(&id)
-            .body("{title,description,_id}")
-            .send()
-            .await.unwrap()
-           .json::<QueryResult<Article>>();
+        .get_by_id(&id)
+        .body("{title,description,_id,body}")
+        .send()
+        .await
+        .unwrap()
+        .json::<QueryResult<ArticleWithBody>>();
+
 
     let article = match v {
         Ok(res) => res.result,
-        Err(_) => Article {
+        Err(_e) => ArticleWithBody {
             title: "Not Found".to_string(),
             description: "Article not found".to_string(),
+            body: None,
             _id: "0".to_string(),
         },
     };
 
-    let response = format!("<h1>{}</h1><p>{}</p>", article.title, article.description);
+    let body = match article.body {
+        Some(body) => body,
+        None => vec![],
+    };
+
+    let body = body
+        .iter()
+        .map(|node|  {
+           return  node.html()
+        })
+        .collect::<Vec<String>>()
+        .join("");
+
+    let response = format!(
+        "<h1>{title}</h1><p>{description}</p><hr>{result}",
+        title = article.title,
+        description = article.description,
+        result = body
+    );
+
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(response)

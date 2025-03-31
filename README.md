@@ -12,7 +12,7 @@ This project is to easily query and parse documents from sanity.io and use it in
   - [x] serde integration with generics
 - [🚧] ORM
   - [x] ORM trait
-- [🚧] Portable Text Renderer
+- [🚧] Portable Text toHTML
   - [x] Base sanity portable text
 - [🔴] Actions
 - [🔴] Subscribe
@@ -20,7 +20,7 @@ This project is to easily query and parse documents from sanity.io and use it in
 ## Example
 
 ```rust
-use sanity_rs::create_client;
+use sanity_rs::client::create_client;
 use sanity_rs::error::RequestError;
 use serde::{Deserialize, Serialize};
 
