@@ -28,7 +28,7 @@ fn default_callback(node: &PortableTextNode) -> String {
         .get("listItem")
         .map_or("p", |v| v.as_str().unwrap());
 
-    if is_list == "number" {
+    if is_list == "number" || is_list == "bullet" {
         tag = "li";
     }
 
@@ -75,7 +75,7 @@ impl ToHTML {
                 .get("listItem")
                 .map_or("p", |v| v.as_str().unwrap());
             let style = node.style.as_ref().unwrap_or(&Style::Normal);
-            if is_list == "ul" {
+            if is_list == "bullet" {
                 if list_stack.is_empty() {
                     result.push_str("<ul>");
                 }
