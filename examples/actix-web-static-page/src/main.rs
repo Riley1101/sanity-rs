@@ -6,7 +6,8 @@ use sanity_rs::client::SanityClient;
 use sanity_rs::config::SanityConfig;
 use sanity_rs::error::{ConfigurationError, RequestError};
 use sanity_rs::orm::ORM;
-use sanity_rs::portabletext::blocks::{PortableTextNode, HTML};
+use sanity_rs::portabletext::blocks::PortableTextNode;
+use sanity_rs::portabletext::renderer::ToHTML;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,8 +28,7 @@ struct Article {
 
 #[get("/")]
 async fn home(client: web::Data<Mutex<SanityClient>>) -> impl Responder {
-    let query = r###"
-        *[_type=="post"][0..2]{
+    let query = r###" *[_type=="post"][0..2]{
           _id,
           title,
           description,
@@ -94,19 +94,12 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
         None => vec![],
     };
 
-    let body = body
-        .iter()
-        .map(|node|  {
-           return  node.html()
-        })
-        .collect::<Vec<String>>()
-        .join("");
-
+    let body = ToHTML::new(body).render();
     let response = format!(
         "<h1>{title}</h1><p>{description}</p><hr>{result}",
         title = article.title,
         description = article.description,
-        result = body
+        result =  body 
     );
 
     HttpResponse::Ok()
