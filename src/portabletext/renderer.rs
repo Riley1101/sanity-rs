@@ -106,59 +106,6 @@ impl ToHTML {
             result
         })
     }
-
-    // pub fn render(&mut self) -> String {
-    //     let mut list_stack = vec![];
-    //
-    //     self.input.iter().fold(String::new(), |mut result, node| {
-    //         let is_list = node
-    //             .extra
-    //             .get("listItem")
-    //             .map_or("p", |v| v.as_str().unwrap());
-    //
-    //         let style = node.style.as_ref().unwrap_or(&Style::Normal);
-    //
-    //         let closing_tag_needed = !list_stack.is_empty() && is_list == "p";
-    //
-    //         if is_list == "bullet" || is_list == "number" {
-    //             if closing_tag_needed {
-    //                 result.push_str("</");
-    //                 let tag = match list_stack.pop() {
-    //                     Some("bullet") => "ul",
-    //                     Some("number") => "ol",
-    //                     _ => "", // Handle unexpected values
-    //                 };
-    //                 result.push_str(tag);
-    //                 result.push_str(">");
-    //             }
-    //             if is_list != "p" {
-    //                 //only push if it's a list
-    //                 if is_list == "bullet" {
-    //                     result.push_str("<ul>");
-    //                 } else {
-    //                     result.push_str("<ol>");
-    //                 }
-    //                 list_stack.push(is_list);
-    //             }
-    //         } else if closing_tag_needed {
-    //             result.push_str("</");
-    //             let tag = match list_stack.pop() {
-    //                 Some("bullet") => "ul",
-    //                 Some("number") => "ol",
-    //                 _ => "", // Handle unexpected values
-    //             };
-    //             result.push_str(tag);
-    //             result.push_str(">");
-    //         }
-    //
-    //         let callback = match self.config.get(style) {
-    //             Some(callback) => *callback,
-    //             None => default_callback,
-    //         };
-    //         result.push_str(callback(node).as_str());
-    //         result
-    //     })
-    // }
 }
 
 #[cfg(test)]
