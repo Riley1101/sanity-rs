@@ -203,38 +203,3 @@ mod test {
     }
 }
 
-// let is_list = node
-//     .extra
-//     .get("listItem")
-//     .map_or("p", |v| v.as_str().unwrap());
-// let style = node.style.as_ref().unwrap_or(&Style::Normal);
-//
-// if is_list == "bullet" {
-//     if list_stack.is_empty() {
-//         result.push_str("<ul>");
-//     }
-//     list_stack.push(is_list);
-// } else if is_list == "number" {
-//     println!("{:?}", is_list);
-//     if list_stack.is_empty() {
-//         result.push_str("<ol>");
-//     }
-//     list_stack.push(is_list);
-// } else {
-//     if !list_stack.is_empty() {
-//         result.push_str("</");
-//         let tag = match list_stack.pop() {
-//             Some("bullet") => "ul",
-//             Some("number") => "ol",
-//             _ => "lia",
-//         };
-//         result.push_str(tag);
-//         result.push_str(">");
-//     }
-// }
-//
-// let callback = match self.config.get(style) {
-//     Some(callback) => *callback,
-//     None => default_callback,
-// };
-// result.push_str(callback(node).as_str());
