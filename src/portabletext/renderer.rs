@@ -66,48 +66,99 @@ impl ToHTML {
         self.config.insert(style, callback);
         self
     }
-
     pub fn render(&mut self) -> String {
         let mut list_stack = vec![];
+
         self.input.iter().fold(String::new(), |mut result, node| {
             let is_list = node
                 .extra
                 .get("listItem")
-                .map_or("p", |v| v.as_str().unwrap());
+                .and_then(|v| v.as_str())
+                .unwrap_or("p");
+
             let style = node.style.as_ref().unwrap_or(&Style::Normal);
-            if is_list == "bullet" {
-                if list_stack.is_empty() {
-                    result.push_str("<ul>");
+
+            let closing_tag_needed = !list_stack.is_empty() && is_list == "p";
+
+            if is_list == "bullet" || is_list == "number" {
+                if closing_tag_needed {
+                    while let Some(tag) = list_stack.pop() {
+                        result.push_str("</");
+                        result.push_str(if tag == "bullet" { "ul" } else { "ol" });
+                        result.push_str(">");
+                    }
                 }
-                list_stack.push(is_list);
-            } else if is_list == "number" {
-                if list_stack.is_empty() {
-                    result.push_str("<ol>");
+                if list_stack.last().copied() != Some(is_list) {
+                    result.push_str(if is_list == "bullet" { "<ul>" } else { "<ol>" });
+                    list_stack.push(is_list);
                 }
-                list_stack.push(is_list);
-            } else {
-                if !list_stack.is_empty() {
+            } else if closing_tag_needed {
+                while let Some(tag) = list_stack.pop() {
                     result.push_str("</");
-                    let tag = match list_stack.pop() {
-                        Some("ul") => "ul",
-                        Some("number") => "ol",
-                        _ => "li",
-                    };
-                    result.push_str(tag);
+                    result.push_str(if tag == "bullet" { "ul" } else { "ol" });
                     result.push_str(">");
                 }
             }
 
-            let callback = match self.config.get(style) {
-                Some(callback) => *callback,
-                None => default_callback,
-            };
+            let callback = self.config.get(style).copied().unwrap_or(default_callback);
             result.push_str(callback(node).as_str());
-            result
 
-            // number, number , number
+            result
         })
     }
+
+    // pub fn render(&mut self) -> String {
+    //     let mut list_stack = vec![];
+    //
+    //     self.input.iter().fold(String::new(), |mut result, node| {
+    //         let is_list = node
+    //             .extra
+    //             .get("listItem")
+    //             .map_or("p", |v| v.as_str().unwrap());
+    //
+    //         let style = node.style.as_ref().unwrap_or(&Style::Normal);
+    //
+    //         let closing_tag_needed = !list_stack.is_empty() && is_list == "p";
+    //
+    //         if is_list == "bullet" || is_list == "number" {
+    //             if closing_tag_needed {
+    //                 result.push_str("</");
+    //                 let tag = match list_stack.pop() {
+    //                     Some("bullet") => "ul",
+    //                     Some("number") => "ol",
+    //                     _ => "", // Handle unexpected values
+    //                 };
+    //                 result.push_str(tag);
+    //                 result.push_str(">");
+    //             }
+    //             if is_list != "p" {
+    //                 //only push if it's a list
+    //                 if is_list == "bullet" {
+    //                     result.push_str("<ul>");
+    //                 } else {
+    //                     result.push_str("<ol>");
+    //                 }
+    //                 list_stack.push(is_list);
+    //             }
+    //         } else if closing_tag_needed {
+    //             result.push_str("</");
+    //             let tag = match list_stack.pop() {
+    //                 Some("bullet") => "ul",
+    //                 Some("number") => "ol",
+    //                 _ => "", // Handle unexpected values
+    //             };
+    //             result.push_str(tag);
+    //             result.push_str(">");
+    //         }
+    //
+    //         let callback = match self.config.get(style) {
+    //             Some(callback) => *callback,
+    //             None => default_callback,
+    //         };
+    //         result.push_str(callback(node).as_str());
+    //         result
+    //     })
+    // }
 }
 
 #[cfg(test)]
@@ -204,3 +255,39 @@ mod test {
         );
     }
 }
+
+// let is_list = node
+//     .extra
+//     .get("listItem")
+//     .map_or("p", |v| v.as_str().unwrap());
+// let style = node.style.as_ref().unwrap_or(&Style::Normal);
+//
+// if is_list == "bullet" {
+//     if list_stack.is_empty() {
+//         result.push_str("<ul>");
+//     }
+//     list_stack.push(is_list);
+// } else if is_list == "number" {
+//     println!("{:?}", is_list);
+//     if list_stack.is_empty() {
+//         result.push_str("<ol>");
+//     }
+//     list_stack.push(is_list);
+// } else {
+//     if !list_stack.is_empty() {
+//         result.push_str("</");
+//         let tag = match list_stack.pop() {
+//             Some("bullet") => "ul",
+//             Some("number") => "ol",
+//             _ => "lia",
+//         };
+//         result.push_str(tag);
+//         result.push_str(">");
+//     }
+// }
+//
+// let callback = match self.config.get(style) {
+//     Some(callback) => *callback,
+//     None => default_callback,
+// };
+// result.push_str(callback(node).as_str());
