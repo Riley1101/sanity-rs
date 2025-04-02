@@ -82,7 +82,6 @@ impl SanityURL {
             url.set_query(None);
             return;
         }
-
         let cond_start = query.find("*[").unwrap_or(0) + 2;
         let cond_end = query.find("]").unwrap_or(0);
         let condition = query[cond_start..cond_end].to_string();

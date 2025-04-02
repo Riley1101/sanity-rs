@@ -65,7 +65,6 @@ impl ORM for SanityClient {
         self
     }
 
-    /// Parse the JSON response
     fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError> {
         let res = self.payload.query_result.as_ref().unwrap();
         let value: T = serde_json::from_str(res).map_err(RequestError::JsonParsingError)?;
