@@ -19,7 +19,7 @@ use url::Url;
 ///   let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
 ///       .unwrap_or("project_id".to_string());
 ///   let sanity_dataset = std::env::var("SANITY_DATASET")
-///       .unwrap_or("dataset".to_string());
+///       .unwrap_or("data_set".to_string());
 ///   let config = SanityConfig::new(sanity_project_id, sanity_dataset);
 ///   let mut client = create_client(config);
 ///   ```
