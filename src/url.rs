@@ -1,4 +1,4 @@
-use crate::error::URLError;
+use super::error::URLError;
 use std::fmt::Display;
 use url::Url;
 

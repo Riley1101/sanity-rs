@@ -1,6 +1,6 @@
-use crate::client::SanityClient;
-use crate::error::RequestError;
-use crate::url::SanityURL;
+use super::client::SanityClient;
+use super::error::RequestError;
+use super::url::SanityURL;
 use serde::de::DeserializeOwned;
 use std::future::Future;
 

@@ -1,5 +1,5 @@
-use crate::config::SanityConfig;
-use crate::{
+use super::config::SanityConfig;
+use super::{
     error::{RequestError, URLError},
     url::SanityURL,
 };
