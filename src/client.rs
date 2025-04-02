@@ -9,6 +9,21 @@ use url::Url;
 
 /// Creates a new SanityClient.
 ///
+/// # Example
+///
+///   ```
+///   use sanity_rs::client::{ create_client, SanityClient };
+///   use sanity_rs::config::SanityConfig;
+///   use sanity_rs::error::ConfigurationError;
+///
+///   let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+///       .unwrap_or("project_id".to_string());
+///   let sanity_dataset = std::env::var("SANITY_DATASET")
+///       .unwrap_or("dataset".to_string());
+///   let config = SanityConfig::new(sanity_project_id, sanity_dataset);
+///   let mut client = create_client(config);
+///   ```
+///
 /// # Arguments
 ///
 /// * `config`: A `SanityConfig` struct containing the configuration for the client.
@@ -28,9 +43,15 @@ pub fn create_client(config: SanityConfig) -> SanityClient {
 }
 
 
+/// Represents the payload of a request.
+///
+/// This struct contains the URL, body, and query result of a request.
 pub struct RequestPayload {
+    /// The URL of the request.
     pub query: Url,
+    /// The body of the request, if any.
     pub body: Option<String>,
+    /// The result of the query, if any.  This is likely populated after processing the request.
     pub query_result: Option<String>,
 }
 
@@ -53,15 +74,32 @@ impl RequestPayload {
     }
 }
 
+/// A client for interacting with the Sanity.io API.
+///
+/// This struct provides methods for making requests to the Sanity API.  It uses the `reqwest` crate for HTTP requests.
 pub struct SanityClient {
-    config: SanityConfig,
+    /// Configuration settings for the client.
+    pub config: SanityConfig,
+    /// The underlying HTTP client used for making requests.
     pub client: ReqwestClient,
+    /// The payload to be sent with requests.  This is likely a struct containing data relevant to the request type.
     pub payload: RequestPayload,
 }
 
 impl SanityClient {
-    /// Create a new instance for the SanityClient
-    /// Initialize a client instance based on Configuration
+    /// Creates a new Sanity client.
+    ///
+    /// # Arguments
+    ///
+    /// * `config`: A `SanityConfig` struct containing the configuration for the client.
+    ///
+    /// # Returns
+    ///
+    /// A `Result` containing the new `SanityClient` or a `RequestError` if the URL parsing fails.
+    ///
+    /// # Errors
+    ///
+    /// This function will return an error if the URL cannot be parsed.
     pub fn new(config: SanityConfig) -> Result<Self, RequestError> {
         let url = SanityURL::new()
             .host(match &config.api_host {
@@ -83,9 +121,9 @@ impl SanityClient {
         Ok(client)
     }
 
-    /// Set the body of the request
+    /// Sets the request body.
     ///
-    /// builder method for setting query body for later usecases.
+    /// This method allows you to set the request body for subsequent use.
     pub fn body(&mut self, body: &str) -> &mut Self {
         self.payload.set_body(body);
         self
