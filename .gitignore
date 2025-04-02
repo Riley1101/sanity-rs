@@ -2,3 +2,6 @@
 .env
 .env.local
 .env.development.local
+/debug
+.rustc_info.json
+.rustdoc_fingerprint.json
