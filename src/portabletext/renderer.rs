@@ -4,9 +4,15 @@ use super::blocks::{Children, PortableTextNode, Style, HTML};
 
 type Callback = fn(&PortableTextNode) -> String;
 
+/// Structure to convert portable text nodes to HTML.
+///
+/// This struct holds the input nodes and a configuration map that maps styles to callbacks.
+/// The callbacks are functions that handle the styling of the corresponding nodes.
 pub struct ToHTML {
-    input: Vec<PortableTextNode>,
-    config: HashMap<Style, Callback>,
+    /// Input vector of portable text nodes.
+    pub input: Vec<PortableTextNode>,
+    /// Configuration map of styles to callbacks.  The key is the style, and the value is a function to apply the style.
+    pub config: HashMap<Style, Callback>,
 }
 
 fn default_callback(node: &PortableTextNode) -> String {
@@ -202,4 +208,3 @@ mod test {
         );
     }
 }
-

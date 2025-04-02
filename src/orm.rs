@@ -1,14 +1,53 @@
-use crate::client::SanityClient;
-use crate::error::RequestError;
-use crate::url::SanityURL;
+use super::client::SanityClient;
+use super::error::RequestError;
+use super::url::SanityURL;
 use serde::de::DeserializeOwned;
-use std::future::Future;
 
+/// A trait defining the interface for an Object-Relational Mapper (ORM).  This trait provides methods for interacting with a data source,
+/// retrieving data in JSON format, and performing CRUD operations.
 pub trait ORM {
-    fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError>;
+    /// Serialized reterived data into JSON.
+    ///
+    /// # Type Parameters
+    ///
+    /// * `T`: The type to deserialize the JSON data into.  Must implement `DeserializeOwned`.
+    ///
+    /// # Returns
+    ///
+    /// * `Result<T, RequestError>`: A Result containing the deserialized data or a `RequestError` if an error occurred.
+    fn json<T: serde::de::DeserializeOwned>(&mut self) -> Result<T, RequestError>;
+
+    /// Retrieves a single record from based on its ID.
+    ///
+    /// # Arguments
+    ///
+    /// * `id`: The ID of the record to retrieve.
+    ///
+    /// # Returns
+    ///
+    /// * `&mut SanityClient`: A mutable reference to the SanityClient.  This likely needs further clarification
+    ///     depending on the actual implementation.  Consider returning a Result instead.
     fn get_by_id(&mut self, id: &str) -> &mut SanityClient;
+
+    /// Retrieves multiple records based on their IDs.
+    ///
+    /// # Arguments
+    ///
+    /// * `ids`: A slice of IDs of the records to retrieve.
+    ///
+    /// # Returns
+    ///
+    /// * `&mut SanityClient`: A mutable reference to the SanityClient. This likely needs further clarification
+    ///     depending on the actual implementation. Consider returning a Result instead.
     fn get_by_ids(&mut self, ids: &[&str]) -> &mut SanityClient;
-    fn send(&mut self) -> impl Future<Output = Result<&mut Self, RequestError>>;
+
+    /// Sends a request to the data source.
+    ///
+    /// # Returns
+    ///
+    /// * `impl Future<Output = Result<&mut Self, RequestError>>`: A future that resolves to a Result containing a mutable reference to `Self`
+    ///     or a `RequestError` if an error occurred.
+    fn send(&mut self) -> impl std::future::Future<Output = Result<&mut Self, RequestError>>;
 }
 
 impl ORM for SanityClient {
@@ -26,7 +65,6 @@ impl ORM for SanityClient {
         self
     }
 
-    /// Parse the JSON response
     fn json<T: DeserializeOwned>(&mut self) -> Result<T, RequestError> {
         let res = self.payload.query_result.as_ref().unwrap();
         let value: T = serde_json::from_str(res).map_err(RequestError::JsonParsingError)?;

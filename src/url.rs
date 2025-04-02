@@ -1,16 +1,31 @@
-use crate::error::URLError;
+use super::error::URLError;
 use std::fmt::Display;
 use url::Url;
 
 #[derive(Debug)]
 pub struct SanityURL {
-    project_id: String,
-    host: String,
-    api_version: String,
-    dataset: String,
+    /// The ID of the Sanity project.
+    pub project_id: String,
+    /// The host of the Sanity project.  This is typically something like `api.sanity.io`.
+    pub host: String,
+    /// The API version to use.  e.g., `v2021-06-07`
+    pub api_version: String,
+    /// The dataset to use.
+    pub dataset: String,
 }
 
 impl SanityURL {
+    /// Creates a new `SanityClient` instance with default values.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use sanity_rs::client::{ create_client, SanityClient };
+    /// use sanity_rs::config::SanityConfig;
+    ///
+    /// let config = SanityConfig::new("project_id".to_string(), "dataset".to_string());
+    /// let client = SanityClient::new(config);
+    /// ```
     pub fn new() -> Self {
         Self {
             project_id: "".to_string(),
@@ -54,12 +69,12 @@ impl SanityURL {
     }
 
     pub fn build(&mut self) -> Result<Url, URLError> {
-        let url = Url::parse(&format!(
+        let url_string = format!(
             "https://{}.{}/{}/data/query/{}",
-            self.project_id, self.host, self.api_version, self.dataset,
-        ))
-        .map_err(URLError::InvalidURL)?;
-        Ok(url)
+            self.project_id, self.host, self.api_version, self.dataset
+        );
+
+        Url::parse(&url_string).map_err(URLError::InvalidURL)
     }
 
     pub fn query(url: &mut Url, query: &str) {
@@ -67,7 +82,6 @@ impl SanityURL {
             url.set_query(None);
             return;
         }
-
         let cond_start = query.find("*[").unwrap_or(0) + 2;
         let cond_end = query.find("]").unwrap_or(0);
         let condition = query[cond_start..cond_end].to_string();
