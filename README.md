@@ -122,5 +122,6 @@ mod test {
 ## Found bugs
 
 [ ] Multiple query condition tends to a bit messy when you have like "slug.current"
-  - checkout query builder at the `./src/url.rs` for the `SanityURL` struct
-  - Just use orm with get_by_id for now you know it works better :3
+
+- checkout query builder at the `./src/url.rs` for the `SanityURL` struct
+- Just use orm with get_by_id for now you know it works better :3
