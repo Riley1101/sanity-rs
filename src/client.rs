@@ -7,6 +7,19 @@ use reqwest::Client as ReqwestClient;
 use std::fmt::Display;
 use url::Url;
 
+/// Creates a new SanityClient.
+///
+/// # Arguments
+///
+/// * `config`: A `SanityConfig` struct containing the configuration for the client.
+///
+/// # Returns
+///
+/// A `SanityClient` instance.
+///
+/// # Panics
+///
+/// Panics if the client cannot be created.  The error from `SanityClient::new` will be included in the panic message.
 pub fn create_client(config: SanityConfig) -> SanityClient {
     match SanityClient::new(config) {
         Ok(client) => client,
