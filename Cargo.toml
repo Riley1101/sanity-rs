@@ -14,3 +14,16 @@ reqwest = { version = "0.12.9", features = ["json"] }
 [dev-dependencies]
 tokio = { version = "1", features = ["full"] }
 dotenv = "0.15.0"
+
+[lib]
+name = "sanity_rs"           # The name of the target.
+path = "src/lib.rs"    # The source file of the target.
+test = true            # Is tested by default.
+doctest = true         # Documentation examples are tested by default.
+bench = true           # Is benchmarked by default.
+doc = true             # Is documented by default.
+proc-macro = false     # Set to `true` for a proc-macro library.
+harness = true         # Use libtest harness.
+edition = "2024"       # The edition of the target.
+crate-type = ["lib"]   # The crate types to generate.
+required-features = [] # Features required to build this target (N/A for lib).
