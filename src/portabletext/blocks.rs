@@ -113,6 +113,7 @@ impl Mark {
 
     pub fn render(&self, mark_def: &MarkDefs) -> MarkResult {
         let extra = &mark_def.extra;
+        println!("Mark: {:?}", self._type);
         match self._type {
             MarkType::StrikeThrough => MarkResult {
                 lhs: String::from("<del>"),

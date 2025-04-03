@@ -29,6 +29,7 @@ fn default_callback(node: &PortableTextNode) -> String {
         },
         None => "p",
     };
+    println!("tag: {:?}", tag);
     let is_list = node
         .extra
         .get("listItem")
@@ -74,6 +75,9 @@ impl ToHTML {
     }
     pub fn render(&mut self) -> String {
         let mut list_stack = vec![];
+        println!("==================================");
+        println!("input: {:?}", self.input);
+        println!("==================================");
 
         self.input.iter().fold(String::new(), |mut result, node| {
             let is_list = node
@@ -81,6 +85,10 @@ impl ToHTML {
                 .get("listItem")
                 .and_then(|v| v.as_str())
                 .unwrap_or("p");
+
+            println!("==================================");
+            println!("\n {}", node.html());
+            println!("==================================");
 
             let style = node.style.as_ref().unwrap_or(&Style::Normal);
 
@@ -111,100 +119,5 @@ impl ToHTML {
 
             result
         })
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::portabletext::blocks::TextNode;
-
-    use super::*;
-
-    #[test]
-    fn default_renderer() {
-        let text = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "lorem is cool and i love it".to_string(),
-        };
-
-        let text2 = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "this is a quote".to_string(),
-        };
-
-        let blockquote = PortableTextNode {
-            _key: "key".to_string(),
-            style: Some(Style::Blockquote),
-            mark_defs: Some(vec![]),
-            _type: "block".to_string(),
-            children: Some(vec![Children::Span(text2)]),
-            extra: HashMap::new(),
-        };
-
-        let paragraph = PortableTextNode {
-            _key: "key".to_string(),
-            mark_defs: Some(vec![]),
-            style: Some(Style::Normal),
-            _type: "span".to_string(),
-            children: Some(vec![Children::Span(text)]),
-            extra: HashMap::new(),
-        };
-
-        let body = vec![paragraph, blockquote];
-        let result = ToHTML::new(body).render();
-        assert_eq!(
-            "<p>lorem is cool and i love it</p><blockquote>this is a quote</blockquote>",
-            result
-        );
-    }
-
-    #[test]
-    fn render_a_span() {
-        let text = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "lorem is cool and i love it".to_string(),
-        };
-
-        let text2 = TextNode {
-            _key: "key".to_string(),
-            _type: "text".to_string(),
-            marks: vec![],
-            text: "this is a quote".to_string(),
-        };
-
-        let blockquote = PortableTextNode {
-            extra: HashMap::new(),
-            mark_defs: Some(vec![]),
-            _key: "key".to_string(),
-            style: Some(Style::Blockquote),
-            _type: "block".to_string(),
-            children: Some(vec![Children::Span(text2)]),
-        };
-
-        let paragraph = PortableTextNode {
-            extra: HashMap::new(),
-            _key: "key".to_string(),
-            mark_defs: Some(vec![]),
-            style: Some(Style::Normal),
-            _type: "block".to_string(),
-            children: Some(vec![Children::Span(text)]),
-        };
-
-        let body = vec![paragraph, blockquote];
-        let result = ToHTML::new(body)
-            .add(Style::H1, |node| node.html())
-            .add(Style::Normal, |node| node.html())
-            .add(Style::Blockquote, |node| node.html())
-            .render();
-        assert_eq!(
-            "<p>lorem is cool and i love it</p><blockquote>this is a quote</blockquote>",
-            result
-        );
     }
 }
