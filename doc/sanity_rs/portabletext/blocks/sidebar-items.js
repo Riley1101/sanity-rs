@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["Children","Style"],"struct":["CodeNode","Mark","MarkDefs","MarkResult","PortableTextNode","TextNode"],"trait":["HTML"]};
