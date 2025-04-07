@@ -33,7 +33,7 @@ async fn main() -> Result<(), RequestError> {
     let config = SanityConfig::new(sanity_project_id, sanity_dataset);
     let mut client = create_client(config);
     let query = r#"
-         *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
+         *[_id == "0c80e597-8275-40b7-a3f5-1a3d3448bc39"]{
            _id,
            _createdAt
          }
@@ -77,7 +77,7 @@ mod test {
         let config: SanityConfig = SanityConfig::new(sanity_project_id, sanity_dataset);
         let mut client = create_client(config);
         let query = r#"
-         *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"][0]{
+         *[_id == "0c80e597-8275-40b7-a3f5-1a3d3448bc39"][0]{
            _id,
            _createdAt
          }
@@ -130,7 +130,7 @@ mod test {
         let mut client = create_client(config);
 
         let v = client
-            .get_by_id("09139a58-311b-4779-8fa4-723f19242a8e")
+            .get_by_id("0c80e597-8275-40b7-a3f5-1a3d3448bc39")
             .body("{_id,_createdAt}")
             .send()
             .await?
