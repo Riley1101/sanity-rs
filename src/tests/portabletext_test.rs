@@ -1,8 +1,7 @@
 #[cfg(test)]
-mod portabletext_test {
+mod tests {
     use crate::portabletext::renderer::ToHTML;
     use crate::portabletext::{Children, CodeNode, PortableTextNode, TextNode, HTML};
-    use serde_json;
 
     #[test]
     fn empty_blocks() {
@@ -522,10 +521,7 @@ mod portabletext_test {
 "###;
 
         let deserialized: PortableTextNode = serde_json::from_str(result).unwrap();
-        let children = match deserialized.children {
-            Some(children) => children,
-            None => vec![],
-        };
+        let children = deserialized.children.unwrap_or_default();
         children.iter().for_each(|child| {
             if let Children::Span(text) = child {
                 assert_eq!(text.text, "lorem is cool and i love it");

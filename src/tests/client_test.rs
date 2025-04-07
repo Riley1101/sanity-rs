@@ -1,5 +1,5 @@
 #[cfg(test)]
-pub mod client_tests {
+pub mod tests {
     use dotenv::dotenv;
     use crate::client::create_client;
     use crate::config::SanityConfig;

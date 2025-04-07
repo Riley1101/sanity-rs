@@ -1,5 +1,5 @@
 #[cfg(test)]
-mod renderer_test {
+pub mod tests {
     use crate::portabletext::renderer::ToHTML;
     use crate::portabletext::{Children, PortableTextNode, Style, TextNode, HTML};
     use std::collections::HashMap;

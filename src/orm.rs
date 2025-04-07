@@ -26,7 +26,7 @@ pub trait ORM {
     /// # Returns
     ///
     /// * `&mut SanityClient`: A mutable reference to the SanityClient.  This likely needs further clarification
-    ///     depending on the actual implementation.  Consider returning a Result instead.
+    ///   depending on the actual implementation.  Consider returning a Result instead.
     fn get_by_id(&mut self, id: &str) -> &mut SanityClient;
 
     /// Retrieves multiple records based on their IDs.
@@ -38,7 +38,7 @@ pub trait ORM {
     /// # Returns
     ///
     /// * `&mut SanityClient`: A mutable reference to the SanityClient. This likely needs further clarification
-    ///     depending on the actual implementation. Consider returning a Result instead.
+    ///   depending on the actual implementation. Consider returning a Result instead.
     fn get_by_ids(&mut self, ids: &[&str]) -> &mut SanityClient;
 
     /// Sends a request to the data source.
@@ -46,7 +46,7 @@ pub trait ORM {
     /// # Returns
     ///
     /// * `impl Future<Output = Result<&mut Self, RequestError>>`: A future that resolves to a Result containing a mutable reference to `Self`
-    ///     or a `RequestError` if an error occurred.
+    ///   or a `RequestError` if an error occurred.
     fn send(&mut self) -> impl std::future::Future<Output = Result<&mut Self, RequestError>>;
 }
 

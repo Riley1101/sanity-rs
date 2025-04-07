@@ -113,7 +113,6 @@ impl Mark {
 
     pub fn render(&self, mark_def: &MarkDefs) -> MarkResult {
         let extra = &mark_def.extra;
-        println!("Mark: {:?}", self._type);
         match self._type {
             MarkType::StrikeThrough => MarkResult {
                 lhs: String::from("<del>"),
@@ -139,7 +138,7 @@ impl Mark {
                 if let Some(href) = extra.get("href") {
                     MarkResult {
                         lhs: format!("<a href=\"{}\">", href),
-                        rhs: format!("</a>"),
+                        rhs: "</a>".to_string(),
                     }
                 } else {
                     MarkResult {
@@ -176,21 +175,34 @@ pub trait HTML {
     fn html(&self) -> String;
 }
 
+fn is_list(node: &PortableTextNode) -> bool {
+    node.extra
+        .get("listItem")
+        .and_then(|v| v.as_str())
+        .map_or_else(|| false, |v| v == "bullet" || v == "number")
+}
+
 impl HTML for PortableTextNode {
     fn html(&self) -> String {
         let mut result = String::new();
-
-        let tag = match &self.style {
-            Some(style) => match style {
-                Style::H1 => "h1",
-                Style::H2 => "h2",
-                Style::H3 => "h3",
-                Style::H4 => "h4",
-                Style::H5 => "h5",
-                Style::Normal => "p",
-                Style::Blockquote => "blockquote",
-            },
-            None => return String::new(),
+        let tag = if is_list(self) {
+            "li".to_string()
+        } else {
+            match &self.style {
+                Some(style) => {
+                    let s = match style {
+                        Style::H1 => "h1",
+                        Style::H2 => "h2",
+                        Style::H3 => "h3",
+                        Style::H4 => "h4",
+                        Style::H5 => "h5",
+                        Style::Normal => "p",
+                        Style::Blockquote => "blockquote",
+                    };
+                    s.to_string()
+                }
+                None => return "".to_string(),
+            }
         };
 
         let children = match &self.children {
@@ -222,7 +234,7 @@ impl HTML for PortableTextNode {
                             }
                         };
 
-                        let mark_result = mark_s.render(&def_borrowed);
+                        let mark_result = mark_s.render(def_borrowed);
                         wrapped_text =
                             format!("{}{}{}", mark_result.lhs, wrapped_text, mark_result.rhs);
                     }
@@ -243,7 +255,7 @@ impl HTML for PortableTextNode {
             }
         }
         result = format!("<{}>{}</{}>", tag, result, tag);
-        result
+        result.to_string()
     }
 }
 
