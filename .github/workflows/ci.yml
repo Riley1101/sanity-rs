@@ -5,7 +5,7 @@ on:
 env:
   CARGO_TERM_COLOR: always
   SANITY_PROJECT_ID: ${{ secrets.SANITY_PROJECT_ID }} # Added environment variable
-  SANITY_PROJECT_ID: ${{ secrets.SANITY_DATASET }} # Added environment variable
+  SANITY_DATASET: ${{ secrets.SANITY_DATASET }} # Added environment variable
 
 jobs:
   build_and_test:
