@@ -4,44 +4,44 @@
 
 This project is to easily query and parse documents from sanity.io and use it in your async rust runtime.
 
-## Features and todo
+## Features and Roadmap
 
 - [🟢] Base
   - [x] Raw string query
   - [x] support String raw response
   - [x] serde integration with generics
-- [🚧] ORM
-  - [x] ORM trait
-- [🚧] Portable Text toHTML
+- [🟢] PortableText Renderer
   - [x] Base sanity portable text
-- [🔴] Actions
+- [🚧] ORM
+  - [x] get_by_id
+  - [x] get_by_ids
+  - [ ] more options
+- [🔴] Mutations
 - [🔴] Subscribe
 
-## Example
+## Getting started
+
+### Creating client
 
 ```rust
-use sanity_rs::client::create_client;
-use sanity_rs::error::RequestError;
-use serde::{Deserialize, Serialize};
+use sanity_rs::client::{ SanityClient , create_client};
+use sanity_rs::config::SanityConfig;
 
-#[allow(non_snake_case)]
-#[derive(Debug, Serialize, Deserialize)]
-struct QueryResult {
-    query: String,
-    result: Vec<Record>,
-    syncTags: Vec<String>,
-    ms: u64,
-}
+let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+    .map_err(|_| ConfigurationError::MissingProjectID)
+    .expect("Missing project ID");
+let sanity_dataset = std::env::var("SANITY_DATASET")
+    .map_err(|_| ConfigurationError::MissingDataset)
+    .expect("Missing dataset");
+let config = SanityConfig::new(sanity_project_id, sanity_dataset);
+let client = create_client(config);
+```
 
-#[allow(non_snake_case)]
-#[derive(Debug, Serialize, Deserialize)]
-struct Record {
-    _id: String,
-    _createdAt: String,
-}
+### Querying documents
 
-#[tokio::main]
-async fn main() -> Result<(), RequestError> {
+```rust
+#[tokio::test]
+async fn fetch_a_document() -> Result<(), RequestError> {
     dotenv().ok();
     let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
         .map_err(|_| ConfigurationError::MissingProjectID)
@@ -52,76 +52,101 @@ async fn main() -> Result<(), RequestError> {
     let config: SanityConfig = SanityConfig::new(sanity_project_id, sanity_dataset);
     let mut client = create_client(config);
     let query = r#"
-         *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
-           _id,
-           _createdAt
-         }
-        "#;
-    let value: Result<QueryResult, RequestError> = client.query(query).await?.json();
-
-    if let Ok(result) = value {
-        for record in result.result {
-            println!("ID: {}, Created At: {}", record._id, record._createdAt);
+        *[_id == "0c80e597-8275-40b7-a3f5-1a3d3448bc39"][0]{
+        _id,
+        _createdAt
         }
-    }
-
+    "#;
+    let value: Result<QueryResult<Record>, RequestError> = client.query(query).await?.json();
+    assert!(value.is_ok());
     Ok(())
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    #[tokio::test]
-    async fn fetch_a_document() {
-        dotenv().ok();
-        let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
-            .map_err(|_| ConfigurationError::MissingProjectID)
-            .expect("Missing project ID");
-        let sanity_dataset = std::env::var("SANITY_DATASET")
-            .map_err(|_| ConfigurationError::MissingDataset)
-            .expect("Missing dataset");
-        let config: SanityConfig = SanityConfig::new(sanity_project_id, sanity_dataset);
-        let mut client = create_client(config);
-        let query = r#"
-         *[_id == "09139a58-311b-4779-8fa4-723f19242a8e"]{
-           _id,
-           _createdAt
-         }
-        "#;
-        let value: Result<QueryResult, RequestError> = client.query(query).await.unwrap().json();
-        assert!(value.is_ok());
-    }
-
-    #[tokio::test]
-    async fn orm_get_by_ids() -> Result<(), RequestError> {
-        dotenv().ok();
-        let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
-            .map_err(|_| ConfigurationError::MissingProjectID)
-            .expect("Missing project ID");
-        let sanity_dataset = std::env::var("SANITY_DATASET")
-            .map_err(|_| ConfigurationError::MissingDataset)
-            .expect("Missing dataset");
-        let config: SanityConfig = SanityConfig::new(sanity_project_id, sanity_dataset);
-        let mut client = create_client(config);
-
-        let v = client
-            .get_by_ids(&[
-                "09139a58-311b-4779-8fa4-723f19242a8e",
-                "09139a58-311b-4779-8fa4-723f19242a8e",
-            ])
-            .body("{_id,_createdAt}")
-            .send()
-            .await?
-            .json::<QueryResult<Vec<Record>>>();
-        assert!(v.is_ok());
-        Ok(())
-    }
 }
 ```
 
-## Found bugs
+### Using ORM trait
 
-[ ] Multiple query condition tends to a bit messy when you have like "slug.current"
+Currently there are a few ORM methods you can use to query documents.
 
-- checkout query builder at the `./src/url.rs` for the `SanityURL` struct
-- Just use orm with get_by_id for now you know it works better :3
+```rust
+#[tokio::test]
+async fn orm_get_by_id() -> Result<(), RequestError> {
+    dotenv().ok();
+    let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+        .map_err(|_| ConfigurationError::MissingProjectID)
+        .expect("Missing project ID");
+    let sanity_dataset = std::env::var("SANITY_DATASET")
+        .map_err(|_| ConfigurationError::MissingDataset)
+        .expect("Missing dataset");
+    let config: SanityConfig = SanityConfig::new(sanity_project_id, sanity_dataset);
+    let mut client = create_client(config);
+
+    let v = client
+        .get_by_id("0c80e597-8275-40b7-a3f5-1a3d3448bc39")
+        .body("{_id,_createdAt}")
+        .send()
+        .await?
+        .json::<QueryResult<Record>>();
+    assert!(v.is_ok());
+    Ok(())
+}
+
+#[tokio::test]
+async fn orm_get_by_ids() -> Result<(), RequestError> {
+    dotenv().ok();
+    let sanity_project_id = std::env::var("SANITY_PROJECT_ID")
+        .map_err(|_| ConfigurationError::MissingProjectID)
+        .expect("Missing project ID");
+    let sanity_dataset = std::env::var("SANITY_DATASET")
+        .map_err(|_| ConfigurationError::MissingDataset)
+        .expect("Missing dataset");
+    let config: SanityConfig = SanityConfig::new(sanity_project_id, sanity_dataset);
+    let mut client = create_client(config);
+
+    let v = client
+        .get_by_ids(&[
+            "09139a58-311b-4779-8fa4-723f19242a8e",
+            "09139a58-311b-4779-8fa4-723f19242a8e",
+        ])
+        .body("{_id,_createdAt}")
+        .send()
+        .await?
+        .json::<QueryResult<Vec<Record>>>();
+    assert!(v.is_ok());
+    Ok(())
+}
+```
+
+## PortableText to HTML
+
+You can now use default `use sanity_rs::portabletext::renderer::ToHTML;` to render portable texts into HTML documents.
+
+Each `PortableTextNode` can call `HTML` trait to call `html()` function.
+Here is an example using default renderer.
+
+```rust
+let mut client = client.lock().await;
+let v = client
+    .get_by_id(&id)
+    .body("{title,description,_id,body}")
+    .send()
+    .await
+    .unwrap()
+    .json::<QueryResult<ArticleWithBody>>();
+
+let article = match v {
+    Ok(res) => res.result,
+    Err(_e) => ArticleWithBody {
+        title: "Not Found".to_string(),
+        description: "Article not found".to_string(),
+        body: None,
+        _id: "0".to_string(),
+    },
+};
+let body = article.body.unwrap_or_default();
+let body = ToHTML::new(body).render();
+let response = format!("{result}", result = body); // result HTML string
+```
+
+## Known bugs
+
+[ ] Multiple query condition tends to a bit messy when you have like "slug.current" - checkout query builder at the `./src/url.rs` for the `SanityURL` struct. Will get back to queries and ORM after PortableText renderer
