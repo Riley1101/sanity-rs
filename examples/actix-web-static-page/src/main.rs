@@ -1,8 +1,7 @@
 use actix_web::{get, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use dotenv::dotenv;
 use futures::lock::Mutex;
-use sanity_rs::client::create_client;
-use sanity_rs::client::SanityClient;
+use sanity_rs::client::{ SanityClient , create_client};
 use sanity_rs::config::SanityConfig;
 use sanity_rs::error::{ConfigurationError, RequestError};
 use sanity_rs::orm::ORM;
@@ -78,7 +77,6 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
         .unwrap()
         .json::<QueryResult<ArticleWithBody>>();
 
-
     let article = match v {
         Ok(res) => res.result,
         Err(_e) => ArticleWithBody {
@@ -88,9 +86,7 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
             _id: "0".to_string(),
         },
     };
-
     let body = article.body.unwrap_or_default();
-
     let body = ToHTML::new(body).render();
     let response = format!(
         "<h1>{title}</h1><p>{description}</p><hr>{result}",
