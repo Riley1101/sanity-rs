@@ -4,6 +4,15 @@
 
 This project is to easily query and parse documents from sanity.io and use it in your async rust runtime.
 
+## Table of Contents
+- [Features and Roadmap](#features-and-roadmap)
+- [Getting started](#getting-started)
+  - [Creating client](#creating-client)
+  - [Querying documents](#querying-documents)
+  - [Using ORM trait](#using-orm-trait)
+- [PortableText to HTML](#portabletext-to-html)
+- [Examples](#examples)
+
 ## Features and Roadmap
 
 - [🟢] Base
@@ -146,6 +155,13 @@ let body = article.body.unwrap_or_default();
 let body = ToHTML::new(body).render();
 let response = format!("{result}", result = body); // result HTML string
 ```
+
+## Examples
+
+Checkout `examples/` folder for more examples.
+
+- [Tokio example](examples/simple-tokio)
+- [Full Server Side Rendering example with Actix Web ](examples/actix-web-static-page)
 
 ## Known bugs
 
