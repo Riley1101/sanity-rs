@@ -89,10 +89,7 @@ async fn article_route(req: HttpRequest, client: web::Data<Mutex<SanityClient>>)
         },
     };
 
-    let body = match article.body {
-        Some(body) => body,
-        None => vec![],
-    };
+    let body = article.body.unwrap_or_default();
 
     let body = ToHTML::new(body).render();
     let response = format!(
