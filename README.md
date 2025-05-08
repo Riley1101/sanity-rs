@@ -14,6 +14,12 @@ This project is to easily query and parse documents from sanity.io and use it in
 - [PortableText to HTML](#portabletext-to-html)
 - [Examples](#examples)
 
+## Installation 
+
+```
+cargo add https://github.com/Riley1101/sanity-rs
+```
+
 ## Features and Roadmap
 
 - [🟢] Base
