@@ -4,9 +4,11 @@ description = "Porting @sanity/client in Rust"
 keywords = ["sanity.io", "sanity"]
 version = "0.1.0"
 edition = "2024"
-publish = ["sanity-rs"]
 autoexamples = false
-exclude=["./examples/"]
+exclude = ["./examples/"]
+license = "MIT OR Apache-2.0"
+authors = ["Riley1101"]
+documentation = "https://github.com/Riley1101/sanity-rs"
 
 [dependencies]
 serde_json = "1.0"
