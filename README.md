@@ -5,6 +5,7 @@
 This project is to easily query and parse documents from sanity.io and use it in your async rust runtime.
 
 ## Table of Contents
+
 - [Features and Roadmap](#features-and-roadmap)
 - [Getting started](#getting-started)
   - [Creating client](#creating-client)
@@ -21,6 +22,7 @@ This project is to easily query and parse documents from sanity.io and use it in
   - [x] serde integration with generics
 - [🟢] PortableText Renderer
   - [x] Base sanity portable text
+  - [🚧] Extract rust-portabletext crate
 - [🚧] ORM
   - [x] get_by_id
   - [x] get_by_ids
@@ -162,7 +164,3 @@ Checkout `examples/` folder for more examples.
 
 - [Tokio example](examples/simple-tokio)
 - [Full Server Side Rendering example with Actix Web ](examples/actix-web-static-page)
-
-## Known bugs
-
-[ ] Multiple query condition tends to a bit messy when you have like "slug.current" - checkout query builder at the `./src/url.rs` for the `SanityURL` struct. Will get back to queries and ORM after PortableText renderer
