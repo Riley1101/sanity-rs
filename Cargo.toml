@@ -1,8 +1,9 @@
 [package]
 name = "sanity-rs"
+description = "Porting @sanity/client in Rust"
+keywords = ["sanity.io", "sanity"]
 version = "0.1.0"
 edition = "2024"
-autoexamples = false
 exclude=["./examples/"]
 
 [dependencies]
