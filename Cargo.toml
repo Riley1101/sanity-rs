@@ -4,8 +4,9 @@ description = "Porting @sanity/client in Rust"
 keywords = ["sanity.io", "sanity"]
 version = "0.1.0"
 edition = "2024"
-exclude=["./examples/"]
 publish = ["sanity-rs"]
+autoexamples = false
+exclude=["./examples/"]
 
 [dependencies]
 serde_json = "1.0"
