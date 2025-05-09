@@ -1,7 +1,5 @@
 # Rust client for Sanity.io
 
-## Porting @sanity/client in Rust
-
 This project is to easily query and parse documents from sanity.io and use it in your async rust runtime.
 
 ## Table of Contents
@@ -32,9 +30,18 @@ cargo add sanity-rs
 - [🚧] ORM
   - [x] get_by_id
   - [x] get_by_ids
-  - [ ] more options
+  - [ ] create document
+  - [ ] delete document
+  - [ ] patch document
+  - [ ] mutation
+  - [ ] create or replace
+  - [ ] create if not exists
 - [🔴] Mutations
 - [🔴] Subscribe
+
+- [🔴] request tags
+- [🔴] query variables
+- [🔴] raw and draft
 
 ## Getting started
 
